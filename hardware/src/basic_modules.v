@@ -39,7 +39,7 @@ module ALU(alu_sel, rs1, rs2, out);
   output reg [31:0] out;
   
   always @(*) begin
-	case(sel)
+	case(alu_sel)
 	  4'b0000: out = rs1 + rs2;
 	  4'b0001: out = rs1 - rs2;
 	  4'b0010: out = rs1 & rs2;
@@ -82,7 +82,9 @@ module IMM_GEN(inst, imm);
 		7'b0100011: imm = {{20{inst[31]}}, inst[31:25], inst[11:7]}; // S-type instruction
 		7'b1100011: imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0}; // SB-type instruction
 		7'b1101111: imm = {{20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0}; // J-type instruction
-		7'b0010111: imm = {inst[31:12], {12{1'b0}}};// U-type instruction (what to do with bottom bits)
+		7'b0010111: imm = {inst[31:12], {12{1'b0}}}; // AUIPC instruction (what to do with bottom bits)
+		7'b0110111: imm = {inst[31:12], {12{1'b0}}}; // LUI instruction
+		default: imm = 32'd0;
 	endcase
   end
 endmodule
