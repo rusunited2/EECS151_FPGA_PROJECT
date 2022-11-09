@@ -540,137 +540,199 @@ module ASYNC_RAM_1W2R(d0, addr0, we0, q1, addr1, q2, addr2, clk);
 
 endmodule // ASYNC_RAM_1W2R
 
-module WF_CU(instruction, rf_we, wb_sel, addr_sel, ldx_sel, pc_sel);
+module WF_CU(instruction, rf_we, wb_sel, addr_sel, ldx_sel, pc_sel, br_taken, jalr, jal);
 	input [31:0] instruction;
+  input br_taken, jalr, jal;
 	output reg rf_we;
-  	output reg [1:0] wb_sel;
+  output reg [1:0] wb_sel;
 	output reg [2:0] addr_sel, ldx_sel, pc_sel;
-
-	reg [2:0] itype; // if R: type = 0
  
 	always @(*) begin
-		case(itype) // Assuming no 2-cycle hazard
-			3'd0: begin // If R-type AKA type = 0
-				addr_sel = 0;
+		case(instruction[6:0]) // R
+      7'b0110011: begin
+        addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 1;
-				pc_sel = 2;
-        		rf_we = 1;
-			end
-			3'd1: begin // If I-type AKA type = 1
-				addr_sel = 0;
+        if (br_taken == 1 || jalr == 1) pc_sel = 3;
+        else if (jal == 1) pc_sel == 1; // testing this
+        else pc_sel = 2;
+        rf_we = 1;
+      end
+      7'b0010011: begin // I and I*
+        addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 1;
-				pc_sel = 2;
-        		rf_we = 1;
-			end
-			3'd2: begin // If S-type AKA type = 2
-				addr_sel = 0;
+				if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+        rf_we = 1;
+      end
+      7'b0000011: begin // I type for load
+        addr_sel = 1; // DMEM for default stage right now
+				ldx_sel = 0;
+				wb_sel = 1;
+        rf_we = 1;
+				if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+        case(instruction[14:12])
+          3'b000: ldx_sel = 3'b100; // lb
+          3'b100: ldx_sel = 3'b011; // lbu
+          3'b001: ldx_sel = 3'b010; // lh
+          3'b101: ldx_sel = 3'b001; // lhu
+          3'b010: ldx_sel = 3'b000; // lw
+          default: begin
+            ldx_sel = 3'b000;
+          end
+        endcase
+      end
+      7'b0100011: begin // S-type (store)
+        addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
-				pc_sel = 2;
-        		rf_we = 0;
-			end
-			3'd3: begin // If B-type AKA type = 3
-				addr_sel = 0;
-				ldx_sel = 0;
-				wb_sel = 0;
-				pc_sel = 2; // if not taken PC + 4
-				// pc_sel = 3; // if taken
-				rf_we = 0;
-			end
-			3'd4: begin // If U-type AKA type = 4
-				addr_sel = 0;
-				ldx_sel = 0;
-				wb_sel = 1;
-				pc_sel = 2;
-        		rf_we = 1;
-			end
-			3'd5: begin // If J-type AKA type = 5
-				addr_sel = 0;
-				ldx_sel = 0;
-				wb_sel = 2;
-				pc_sel = 3; // from ALU
-        		rf_we = 1;
-			end
+				if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+        rf_we = 0;
+      end
+      7'b1100011: begin // B-type
+        addr_sel = 0;
+        ldx_sel = 0;
+        wb_sel = 0;
+        rf_we = 0;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+      end
+			7'b1101111: begin // J-Type
+        addr_sel = 0;
+        ldx_sel = 0;
+        wb_sel = 2;
+        rf_we = 1;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+      end
+      7'b1100111: begin // JALR
+        addr_sel = 0;
+        ldx_sel = 0;
+        wb_sel = 2;
+        rf_we = 1;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+      end
+      7'b0010111: begin // U (AUIPC) Type
+        addr_sel = 0;
+        ldx_sel = 0;
+        wb_sel = 1;
+        rf_we = 1;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+      end
+      7'b0010111: begin // U (LUI) Type
+        addr_sel = 0;
+        ldx_sel = 0;
+        wb_sel = 1;
+        rf_we = 1;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
+      end
 			default: begin
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
 				pc_sel = 0;
-        		rf_we = 0;
+        rf_we = 0;
 			end
 		endcase
 	end
 endmodule // WF_CU
 
-module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
+module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel, br_taken, jalr);
 	input [31:0] instruction, pc;
+  input br_taken, jalr;
 	output reg pc_thirty, nop_sel, orange_sel, green_sel;
-
-	reg [2:0] itype; // if R: type = 0
 
 	assign pc_thirty = pc[30];
  
 	always @(*) begin
-		case(itype) // Assuming no 2-cycle hazard
-			3'd0: begin // If R-type AKA type = 0
-				orange_sel = 0;
+		case(instruction[6:0]) // Assuming no 2-cycle hazard
+      7'b0110011: begin
+        orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
-			end
-			3'd1: begin // If I-type AKA type = 1
-				orange_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b0010011: begin // I and I*
+        orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
-			end
-			3'd2: begin // If S-type AKA type = 2
-				orange_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b0000011: begin // I type for load
+        orange_sel = 0;
 				green_sel = 0;
-       			nop_sel = 0;
-			end
-			3'd3: begin // If B-type AKA type = 3
-				orange_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b0100011: begin // S-type (store)
+        orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
-			end
-			3'd4: begin // If U-type AKA type = 4
-				orange_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b1100011: begin // B-type
+        orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
-			end
-			3'd5: begin // If J-type AKA type = 5
-				orange_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+			7'b1101111: begin // J-Type
+        orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
-			end
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b1100111: begin // JALR
+        orange_sel = 0;
+				green_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b0010111: begin // U (AUIPC) Type
+        orange_sel = 0;
+				green_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
+      7'b0010111: begin // U (LUI) Type
+        orange_sel = 0;
+				green_sel = 0;
+        if (br_taken || jalr) nop_sel = 1;
+        else nop_sel = 0;
+      end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;
-        		nop_sel = 0;
+        nop_sel = 0;
 			end
 		endcase
 	end
 endmodule // D_CU
 
-module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs2_sel, alu_sel, csr_sel);
+module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_sel, b_sel, rs2_sel, alu_sel, csr_sel, br_taken);
 	input [31:0] instruction;
+  input br_eq, br_lt;
 
 	output reg br_un, b_sel, csr_sel;
 	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
 	output reg [2:0] imm_sel;
 	output reg [3:0] alu_sel;
-
-	reg [2:0] itype; // if R: type = 0
+  output reg br_taken;
  
 	always @(*) begin
-		case(itype) // Assuming no forwarding
-			3'd0: begin // If R-type AKA type = 0
-				orange_sel = 0;
-				green_sel = 0;
+		case(instruction[6:0])
+			7'b0110011: begin // If R-type AKA type = 0
+				orange_sel = 0; // forwarding
+				green_sel = 0; // forwarding
 				br_un = 0;
 				imm_sel = 0;
-				a_sel = 0;
+				a_sel = 0; // forwarding
 				b_sel = 0;
 				rs2_sel = 0;
 				case(instruction[14:12])
@@ -691,7 +753,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
         endcase
 				csr_sel = 0;
 			end
-			3'd1: begin // If I-type AKA type = 1
+			7'b0010011: begin // If I-type (I and I*)
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -700,17 +762,33 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				b_sel = 1;
 				rs2_sel = 0;
 				case(instruction[14:12])
-          3'b000: alu_sel = 4'b0000;
-          3'b111: alu_sel = 4'b0010;
-          3'b110: alu_sel = 4'b0011;
-          3'b100: alu_sel = 4'b0100;
-          3'b010: alu_sel = 4'b1000;
-          3'b011: alu_sel = 4'b1001;
+          3'b000: alu_sel = 4'b0000; // addi
+          3'b111: alu_sel = 4'b0010; // andi
+          3'b110: alu_sel = 4'b0011; // ori
+          3'b100: alu_sel = 4'b0100; // xori
+          3'b001: alu_sel = 4'b0101; // slli
+          3'b101: begin
+            if (instruction[31:25] == 7'b0010011) alu_sel = 4'b0110; // srli
+            else alu_sel = 4'b0111; // srai
+          end
+          3'b010: alu_sel = 4'b1000; // slti
+          3'b011: alu_sel = 4'b1001; // sltiu
         endcase
 				csr_sel = 0;
 			end
-			3'd2: begin // If S-type AKA type = 2
-				orange_sel = 0;
+      7'b0000011: begin // load (I type)
+        orange_sel = 0;
+				green_sel = 0;
+				br_un = 0;
+				imm_sel = 0;
+				a_sel = 0;
+				b_sel = 1;
+				rs2_sel = 0;
+        alu_sel = 4'b0000;
+        csr_sel = 0;
+      end
+      7'b0100011: begin // S type
+        orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
 				imm_sel = 0;
@@ -719,25 +797,42 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
-			end
-			3'd3: begin // If B-type AKA type = 3
+      end
+			7'b1100011: begin // B-type
 				orange_sel = 0;
 				green_sel = 0;
-				br_un = 0;
-        if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) begin // checking funct 3 for b instruction
-          br_un = 1;
-        end
-        else begin
-          br_un = 0;
-        end
+        if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) br_un = 1;
+        else br_un = 0;
 				a_sel = 0;
 				b_sel = 0;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
 			end
-			3'd4: begin // If U-type AKA type = 4
-				orange_sel = 0;
+      7'b1101111: begin // J type (jal)
+        orange_sel = 0;
+				green_sel = 0;
+				br_un = 0;
+				imm_sel = 0;
+				a_sel = 0;
+				b_sel = 0;
+				rs2_sel = 0;
+				alu_sel = 0;
+				csr_sel = 0;
+      end
+      7'b1100111: begin // JALR (I type)
+        orange_sel = 0;
+				green_sel = 0;
+				br_un = 0;
+				imm_sel = 0;
+				a_sel = 0;
+				b_sel = 0;
+				rs2_sel = 0;
+				alu_sel = 0;
+				csr_sel = 0;
+      end
+      7'b0010111: begin // AUIPC
+        orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
 				imm_sel = 0;
@@ -746,18 +841,18 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
-			end
-			3'd5: begin // If J-type AKA type = 5
-				orange_sel = 0;
+      end
+      7'b0110111: begin // LUI
+        orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 0;
+				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
-			end
+      end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;

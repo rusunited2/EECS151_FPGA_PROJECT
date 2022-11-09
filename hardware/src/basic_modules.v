@@ -110,11 +110,27 @@ module IMM_GEN(inst, imm);
 	case(inst[6:0])
 		7'b0010011: imm = {{20{inst[31]}}, inst[31:20]}; // I-type instruction
 		7'b0100011: imm = {{20{inst[31]}}, inst[31:25], inst[11:7]}; // S-type instruction
-		7'b1100011: imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 0}; // SB-type instruction
-		7'b1101111: imm = {{20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 0}; // J-type instruction
+		7'b1100011: imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0}; // SB-type instruction
+		7'b1101111: imm = {{20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0}; // J-type instruction
 		7'b0010111: imm = {inst[31:12], {12{1'b0}}}; // AUIPC instruction (what to do with bottom bits)
 		7'b0110111: imm = {inst[31:12], {12{1'b0}}}; // LUI instruction
 		default: imm = 32'd0;
 	endcase
   end
 endmodule
+
+module LDX(ldx_in, ldx_sel, ldx_out);
+	input [31:0] ldx_in;
+	input [2:0] ldx_sel;
+	output reg [31:0] ldx_out;
+
+	always @(*) begin
+		case(ldx_sel)
+			3'b000: ldx_out = ldx_in; // load word
+			3'b001: ldx_out = {{16{1'b0}}, ldx_in[15:0]}; // lhu
+			3'b010: ldx_out = {{16{ldx_in[15]}}, ldx_in[15:0]}; // lh
+			3'b011: ldx_out = {{24{1'b0}}, ldx_in[7:0]}; // lbu
+			3'b100: ldx_out = {{24{ldx_in[7]}}, ldx_in[7:0]}; // lb
+		endcase
+	end
+endmodule;
