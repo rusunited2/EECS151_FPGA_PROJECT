@@ -540,114 +540,114 @@ module ASYNC_RAM_1W2R(d0, addr0, we0, q1, addr1, q2, addr2, clk);
 
 endmodule // ASYNC_RAM_1W2R
 
-module WF_CU(instruction);
+module WF_CU(instruction, rf_we, wb_sel, addr_sel, ldx_sel, pc_sel);
 	input [31:0] instruction;
 	output reg rf_we;
-  output [1:0] reg wb_sel;
-	output [2:0] reg addr, ldx_sel, pc_sel;
+  	output reg [1:0] wb_sel;
+	output reg [2:0] addr_sel, ldx_sel, pc_sel;
 
-	reg [2:0] type; // if R: type = 0
+	reg [2:0] itype; // if R: type = 0
  
 	always @(*) begin
-		case(type) // Assuming no 2-cycle hazard
+		case(itype) // Assuming no 2-cycle hazard
 			3'd0: begin // If R-type AKA type = 0
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 1;
 				pc_sel = 2;
-        rf_we = 1;
+        		rf_we = 1;
 			end
 			3'd1: begin // If I-type AKA type = 1
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 1;
 				pc_sel = 2;
-        rf_we = 1;
+        		rf_we = 1;
 			end
 			3'd2: begin // If S-type AKA type = 2
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
 				pc_sel = 2;
-        rf_we = 0;
+        		rf_we = 0;
 			end
 			3'd3: begin // If B-type AKA type = 3
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
 				pc_sel = 2; // if not taken PC + 4
-        // pc_sel = 3; // if taken
-        rf_we = 0;
+				// pc_sel = 3; // if taken
+				rf_we = 0;
 			end
 			3'd4: begin // If U-type AKA type = 4
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 1;
 				pc_sel = 2;
-        rf_we = 1;
+        		rf_we = 1;
 			end
 			3'd5: begin // If J-type AKA type = 5
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 2;
 				pc_sel = 3; // from ALU
-        rf_we = 1;
+        		rf_we = 1;
 			end
 			default: begin
 				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
 				pc_sel = 0;
-        rf_we = 0;
+        		rf_we = 0;
 			end
 		endcase
 	end
 endmodule // WF_CU
 
-module D_CU(instruction, pc, rf_we, pc_thirty, nop_sel, orange_sel, green_sel);
+module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
 	input [31:0] instruction, pc;
 	output reg pc_thirty, nop_sel, orange_sel, green_sel;
 
-	reg [2:0] type; // if R: type = 0
+	reg [2:0] itype; // if R: type = 0
 
 	assign pc_thirty = pc[30];
  
 	always @(*) begin
-		case(type) // Assuming no 2-cycle hazard
+		case(itype) // Assuming no 2-cycle hazard
 			3'd0: begin // If R-type AKA type = 0
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 			3'd1: begin // If I-type AKA type = 1
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 			3'd2: begin // If S-type AKA type = 2
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+       			nop_sel = 0;
 			end
 			3'd3: begin // If B-type AKA type = 3
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 			3'd4: begin // If U-type AKA type = 4
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 			3'd5: begin // If J-type AKA type = 5
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;
-        nop_sel = 0;
+        		nop_sel = 0;
 			end
 		endcase
 	end
@@ -657,25 +657,25 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 	input [31:0] instruction;
 
 	output reg br_un, b_sel, csr_sel;
-	output [1:0] reg orange_sel, green_sel, a_sel, rs2_sel;
-	output [2:0] reg imm_sel;
-	output [3:0] reg alu_sel;
+	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
+	output reg [2:0] imm_sel;
+	output reg [3:0] alu_sel;
 
-	reg [2:0] type; // if R: type = 0
+	reg [2:0] itype; // if R: type = 0
  
 	always @(*) begin
-		case(type) // Assuming no forwarding
+		case(itype) // Assuming no forwarding
 			3'd0: begin // If R-type AKA type = 0
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 0:
+				b_sel = 0;
 				rs2_sel = 0;
-				case(inst[14:12])
+				case(instruction[14:12])
           3'b000: begin
-            if (inst[31:25] == 7'b0100000) alu_sel = 4'b0001;
+            if (instruction[31:25] == 7'b0100000) alu_sel = 4'b0001;
             else alu_sel = 4'b0000;
           end
           3'b111: alu_sel = 4'b0010;
@@ -683,7 +683,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
           3'b100: alu_sel = 4'b0100;
           3'b001: alu_sel = 4'b0101;
           3'b101: begin
-            if (inst[31:25] == 7'b0100000) alu_sel = 4'b0111;
+            if (instruction[31:25] == 7'b0100000) alu_sel = 4'b0111;
             else alu_sel = 4'b0110;
           end
           3'b010: alu_sel = 4'b1000;
@@ -697,9 +697,9 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 1:
+				b_sel = 1;
 				rs2_sel = 0;
-				case(inst[14:12])
+				case(instruction[14:12])
           3'b000: alu_sel = 4'b0000;
           3'b111: alu_sel = 4'b0010;
           3'b110: alu_sel = 4'b0011;
@@ -715,7 +715,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 1:
+				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -724,14 +724,14 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-        if (inst[14:12] == 3'b111 || inst[14:12] == 3'b110) begin // checking funct 3 for b instruction
+        if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) begin // checking funct 3 for b instruction
           br_un = 1;
         end
         else begin
           br_un = 0;
         end
 				a_sel = 0;
-				b_sel = 0:
+				b_sel = 0;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -742,7 +742,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 1:
+				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -753,7 +753,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 0:
+				b_sel = 0;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -764,7 +764,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, imm_sel, a_sel, b_sel, rs
 				br_un = 0;
 				imm_sel = 0;
 				a_sel = 0;
-				b_sel = 0:
+				b_sel = 0;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;

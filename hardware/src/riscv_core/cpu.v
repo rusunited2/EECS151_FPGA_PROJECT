@@ -106,4 +106,81 @@ module cpu #(
     // TODO: Your code to implement a fully functioning RISC-V core
     // Add as many modules as you want
     // Feel free to move the memory modules around
+	// 1. WF ------------------------------------------------------
+
+	// 1.1: pc_mux
+	wire [2:0] pc_mux_sel;
+  	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3, pc_mux_in4;
+	wire pc_mux_out;
+	EIGHT_INPUT_MUX pc_mux (
+		.sel(pc_mux_sel),
+		.in0(pc_mux_in0),
+		.in1(pc_mux_in1),
+		.in2(pc_mux_in2),
+		.in3(pc_mux_in3),
+		.in4(pc_mux_in4),
+		.in5(0),
+		.in6(0),
+		.in7(0),
+		.out(pc_mux_out)
+	);
+
+	// 1.2: pc_plus_four
+    wire [31:0] pc_plus_four_in0;
+    wire [31:0] pc_plus_four_out;
+	ADDER pc_plus_four (
+		.in0(pc_plus_four_in0),
+		.in1(32'd4),
+		.out(pc_plus_four_out)
+	);
+
+	// 1.3: pc_register
+	wire [31:0] pc_register_q, pc_register_d;
+	REGISTER #(
+        .N(32)
+    ) pc_register (
+        .q(pc_register_q),
+		.d(pc_register_d),
+		.clk(clk)
+    );
+
+	// Wiring for WF stage
+	assign pc_mux_out = pc_plus_four_in0;
+	assign pc_plus_four_out = pc_mux_in2;
+
+	assign pc_mux_out = pc_register_d;
+	assign pc_register_q = pc_mux_in4; 
+
+	assign pc_mux_out = bios_addra;
+	assign pc_mux_out = imem_addrb;
+
+
+	// 2. D -------------------------------------------------------
+	wire pc_thirty_mux_sel;
+  	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
+	wire pc_thirty_mux_out;
+	TWO_INPUT_MUX pc_thirty_mux (
+		.sel(pc_thirty_mux_sel),
+		.in0(pc_thirty_mux_in0),
+		.in1(pc_thirty_mux_in1),
+		.out(pc_thirty_mux_out)
+	);
+
+	wire nop_mux_sel;
+  	wire [31:0] nop_mux_in0, nop_mux_in1; // TODO: nop_mux_in1 needs to be the nop[31:0]
+	wire nop_mux_out;
+	TWO_INPUT_MUX nop_mux (
+		.sel(nop_mux_sel),
+		.in0(nop_mux_in0),
+		.in1(32'b0000_0000_0000_0000_0000_0000_0001_0011), // nop_mux_in1 = addi x0, x0, 0 = 00000000000000000000000000010011
+		.out(nop_mux_out)
+	);
+	
+	// Wiring for D stage
+	assign bios_douta = pc_thirty_mux_in0;
+	assign imem_doutb = pc_thirty_mux_in1;
+	
+	assign pc_thirty_mux_out = nop_mux_in0;
+
+	// 3. X -------------------------------------------------------
 endmodule

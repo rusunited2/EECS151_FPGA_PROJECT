@@ -4,7 +4,37 @@
 `timescale 1ns/1ns
 
 // MUX module
-module THREE_INPUT_MUX(sel, in0, in1, in2, in3, in4, in5, in6, in7, out);
+module TWO_INPUT_MUX(sel, in0, in1, out);
+  input sel;
+  input [31:0] in0, in1;
+  output reg [31:0] out;
+  
+  always @(*) begin
+	case(sel)
+	  1'b0: out = in0;
+	  1'b1: out = in1;
+	  default: out = 0;
+	endcase
+  end
+endmodule // TWO_INPUT_MUX
+
+module FOUR_INPUT_MUX(sel, in0, in1, in2, in3, out);
+  input [1:0] sel;
+  input [31:0] in0, in1, in2, in3;
+  output reg [31:0] out;
+  
+  always @(*) begin
+	case(sel)
+	  2'b00: out = in0;
+	  2'b01: out = in1;
+	  2'b10: out = in2;
+	  2'b11: out = in3;
+	  default: out = 0;
+	endcase
+  end
+endmodule // FOUR_INPUT_MUX
+
+module EIGHT_INPUT_MUX(sel, in0, in1, in2, in3, in4, in5, in6, in7, out);
   input [2:0] sel;
   input [31:0] in0, in1, in2, in3, in4, in5, in6, in7;
   output reg [31:0] out;
@@ -22,7 +52,7 @@ module THREE_INPUT_MUX(sel, in0, in1, in2, in3, in4, in5, in6, in7, out);
 	  default: out = 0;
 	endcase
   end
-endmodule // THREE_INPUT_MUX
+endmodule // EIGHT_INPUT_MUX
 
 // Adder
 module ADDER(in0, in1, out);
