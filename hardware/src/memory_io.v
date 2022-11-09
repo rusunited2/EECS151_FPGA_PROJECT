@@ -2,22 +2,30 @@
 
 */
 `timescale 1ns/1ns
-
+`include "opcode.vh"
 // IO module
-module IO_MEMORY_MAP(clk, instruction, addr, uart_tx_data_in, out);
-    input [31:0] instruction;
-    input [31:0] addr;
-    input [7:0] uart_tx_data_in;
-    output reg [31:0] out;
-
+module IO_MEMORY_MAP #(
+    parameter CPU_CLOCK_FREQ = 50_000_000,
+    parameter RESET_PC = 32'h4000_0000,
+    parameter BAUD_RATE = 115200
+) (
+    input clk,
+    input rst,
+    input serial_in,
+    input [31:0] instruction,
+    input [31:0] addr,
+    input [7:0] uart_tx_data_in,
+    output reg [31:0] out,
+    output serial_out
+);
     // On-chip UART
     //// UART Receiver
     wire [7:0] uart_rx_data_out;
     wire uart_rx_data_out_valid;
-    wire uart_rx_data_out_ready;
+    reg uart_rx_data_out_ready;
     //// UART Transmitter
     // wire [7:0] uart_tx_data_in;
-    wire uart_tx_data_in_valid;
+    reg uart_tx_data_in_valid;
     wire uart_tx_data_in_ready;
     uart #(
         .CLOCK_FREQ(CPU_CLOCK_FREQ),

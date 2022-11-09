@@ -109,7 +109,6 @@ module cpu #(
 	// 1. WF ------------------------------------------------------
 
 	// 1.1: pc_mux
-    // TO DO: Call control logic for pc_mux_sel
 	wire [2:0] pc_mux_sel;
   	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3, pc_mux_in4;
 	wire pc_mux_out;
@@ -145,14 +144,15 @@ module cpu #(
 	// Wiring for WF stage
     assign pc_plus_four_in0 = pc_mux_out;
     assign pc_mux_in2 = pc_plus_four_out;
+    assign pc_mux_in0 = RESET_PC;
 
     assign pc_register_d = pc_mux_out;
     assign pc_mux_in4 = pc_register_q;
 
-    assign bios_addra = pc_mux_out;
-    assign imem_addrb = pc_mux_out;
+    assign bios_addra = rst ? RESET_PC : pc_mux_out;
+    assign imem_addrb = rst ? RESET_PC : pc_mux_out;
 
-
+    assign bios_ena = 1;
 	// 2. D -------------------------------------------------------
 	wire pc_thirty_mux_sel;
   	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
@@ -376,7 +376,7 @@ module cpu #(
     wire [1:0] rs2_mux3_sel;
   	wire [31:0] rs2_mux3_in0, rs2_mux3_in1, rs2_mux3_in2;
 	wire [31:0] rs2_mux3_out;
-	FOUR_INPUT_MUX rs2_mux2 (
+	FOUR_INPUT_MUX rs2_mux3 (
 		.sel(rs2_mux3_sel),
 		.in0(rs2_mux3_in0),
 		.in1(rs2_mux3_in1),
@@ -391,13 +391,16 @@ module cpu #(
     wire [31:0] uart_out;
     IO_MEMORY_MAP uart (
         .clk(clk),
+        .rst(rst),
+        .serial_in(serial_in),
+        .serial_out(serial_out),
         .instruction(uart_instruction),
         .addr(uart_addr),
         .uart_tx_data_in(uart_tx_data_in),
         .out(uart_out)
     );
-
-    wire [1:0] addr_mux_sel;
+    
+    reg [1:0] addr_mux_sel;
   	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
 	wire addr_mux_out;
 	FOUR_INPUT_MUX addr (
@@ -422,6 +425,35 @@ module cpu #(
         endcase
     end
 
+    wire [31:0] ldx_in;
+    wire [2:0] ldx_sel;
+    wire [31:0] ldx_out;
+    LDX ldx (
+        .ldx_in(ldx_in), 
+        .ldx_sel(ldx_sel), 
+        .ldx_out(ldx_out)
+    );
+
+    wire [31:0] pc_plus_four2_in0;
+    wire [31:0] pc_plus_four2_out;
+	ADDER pc_plus_four2 (
+		.in0(pc_plus_four2_in0),
+		.in1(32'd4),
+		.out(pc_plus_four2_out)
+	);
+
+    wire [1:0] wb_mux_sel;
+  	wire [31:0] wb_mux_in0, wb_mux_in1, wb_mux_in2, wb_mux_in3;
+	wire wb_mux_out;
+	FOUR_INPUT_MUX wb_mux (
+		.sel(wb_mux_sel),
+		.in0(wb_mux_in0),
+		.in1(wb_mux_in1),
+		.in2(wb_mux_in2),
+		.in3(wb_mux_in3),
+		.out(wb_mux_out)
+	);
+
 	// Wiring for X stage
 	assign instruction_execute_register_d = instruction_decode_register_q;
 	assign imm_gen_in = instruction_decode_register_q;
@@ -444,22 +476,18 @@ module cpu #(
     assign a_mux_in0 = rs1_mux2_out;
     assign a_mux_in1 = 0; // temp
     assign a_mux_in2 = 0; // temp
-    assign a_mux_sel = 0; // temp
 
     // inputs to B-MUX
     assign b_mux_in0 = rs2_mux2_out;
     assign b_mux_in1 = imm_gen_out;
-    assign b_mux_sel = 0; // temp
 
     // inputs to ALU
     assign alu_rs1 = a_mux_out;
     assign alu_rs2 = b_mux_out;
-    assign alu_sel = 0; // temp
 
     // inputs to CSR_MUX
     assign csr_mux_in0 = imm_gen_out;
     assign csr_mux_in1 = rs1_mux2_out;
-    assign csr_mux_sel = 0; // temp
 
     // input to CSR register
     assign csr_in = csr_mux_out;
@@ -468,6 +496,14 @@ module cpu #(
     assign rs2_mux3_in0 = rs2_mux2_out;
     assign rs2_mux3_in1 = 0; // temp
     assign rs2_mux3_in2 = 0; // temp
+
+    // send ALU result back to PC_SEL MUX
+    assign pc_mux_in3 = alu_out;
+
+
+
+    // --------------------------------------------MEMORY ASSIGNS
+
 
     // input to DMEM
     assign dmem_addr = alu_out[15:2];
@@ -482,7 +518,7 @@ module cpu #(
 
     // input to IMEM
     assign imem_addra = alu_out[15:2];
-    assign dina = rs2_mux3_out;
+    assign imem_dina = rs2_mux3_out;
     assign imem_wea = 4'b1111; // temp
     assign imem_ena = 0; // temp
 
@@ -491,12 +527,103 @@ module cpu #(
     assign uart_addr = alu_out;
     assign uart_tx_data_in = rs2_mux3_out[7:0];
 
-    // addr MUX
+    // addr MUX input
     assign addr_mux_in0 = bios_doutb;
     assign addr_mux_in1 = dmem_dout;
     assign addr_mux_in2 = uart_out;
     assign addr_mux_in3 = 0;
     
+    // ldx input
+    assign ldx_in = addr_mux_out;
 
+    // pc + 4 in execute stage input
+    assign pc_plus_four2_in0 = pc_execute_register_q;
+
+    // wb mux
+    assign wb_mux_in0 = ldx_out;
+    assign wb_mux_in1 = alu_register_q;
+    assign wb_mux_in2 = pc_plus_four2_out;
+
+    // writeback to regfile
+    assign wa = instruction_execute_register_q;
+    assign wd = wb_mux_out;
+
+    
+
+
+    // ------------------- WF CONTROL LOGIC
+    wire [31:0] wf_instruction;
+    wire wf_rf_we;
+    wire [1:0] wf_wb_sel;
+    wire [2:0] wf_ldx_sel, wf_pc_sel;
+    WF_CU wf_cu (
+        .rst(rst),
+        .instruction(wf_instruction), 
+        .rf_we(wf_rf_we), 
+        .wb_sel(wf_wb_sel), 
+        .ldx_sel(wf_ldx_sel), 
+        .pc_sel(wf_pc_sel)
+    );
+
+    assign wf_instruction = instruction_execute_register_q; // check this
+    assign we = wf_rf_we;
+    assign wb_mux_sel = wf_wb_sel;
+    assign ldx_sel = wf_ldx_sel;
+    assign pc_mux_sel = wf_pc_sel;
+
+
+
+    // ------------------ D CONTROL LOGIC
+    wire [31:0] d_instruction;
+    wire [31:0] d_pc;
+    wire d_pc_thirty, d_nop_sel, d_orange_sel, d_green_sel;
+    D_CU d_cu (
+        .instruction(d_instruction), 
+        .pc(d_pc), 
+        .pc_thirty(d_pc_thirty), 
+        .nop_sel(d_nop_sel), 
+        .orange_sel(d_orange_sel), 
+        .green_sel(d_green_sel)
+    );
+
+    assign d_instruction = nop_mux_out;
+    assign d_pc = pc_register_q;
+    assign pc_thirty_mux_sel = d_pc_thirty;
+    assign nop_mux_sel = d_nop_sel;
+    assign rs1_mux_sel = d_orange_sel;
+    assign rs2_mux_sel = d_green_sel;
+
+    
+    // ------------------- EX CONTROL LOGIC
+    wire [31:0] x_instruction;
+    wire x_br_eq, x_br_lt;
+    wire x_br_un, x_b_sel, x_csr_sel;
+    wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel;
+    wire [3:0] x_alu_sel;
+    X_CU x_cu (
+        .instruction(x_instruction), 
+        .orange_sel(x_orange_sel), 
+        .green_sel(x_green_sel), 
+        .br_un(x_br_un), 
+        .br_eq(x_br_eq), 
+        .br_lt(x_br_lt), 
+        .a_sel(x_a_sel), 
+        .b_sel(x_b_sel), 
+        .rs2_sel(x_rs2_sel), 
+        .alu_sel(x_alu_sel), 
+        .csr_sel(x_csr_sel)
+    );
+
+    assign x_instruction = instruction_decode_register_q;
+    assign x_br_eq = branch_comp_br_eq;
+    assign x_br_lt = branch_comp_br_lt;
+    assign branch_comp_br_un = x_br_un;
+    assign rs1_mux2_sel = x_orange_sel;
+    assign rs2_mux2_sel = x_green_sel;
+    assign a_mux_sel = x_a_sel;
+    assign b_mux_sel = x_b_sel;
+    assign rs2_mux3_sel = x_rs2_sel;
+    assign alu_sel = x_alu_sel;
+    assign csr_mux_sel = x_csr_sel;
 
 endmodule

@@ -22,6 +22,7 @@
  REGISTER_R_CE
 */
 `timescale 1ns/1ns
+`include "opcode.vh"
 
 // Register of D-Type Flip-flops
 module REGISTER(q, d, clk);
@@ -540,39 +541,46 @@ module ASYNC_RAM_1W2R(d0, addr0, we0, q1, addr1, q2, addr2, clk);
 
 endmodule // ASYNC_RAM_1W2R
 
-module WF_CU(instruction, rf_we, wb_sel, addr_sel, ldx_sel, pc_sel, br_taken, jalr, jal);
+module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
+  // needs branch logic, jalr, and jal (as inputs)
+  input rst;
 	input [31:0] instruction;
-  input br_taken, jalr, jal;
+  // input br_taken, jalr, jal;
 	output reg rf_we;
   output reg [1:0] wb_sel;
-	output reg [2:0] addr_sel, ldx_sel, pc_sel;
+	output reg [2:0] ldx_sel, pc_sel;
+
+  always @(*) begin
+    if (rst) pc_sel = 0;
+    else pc_sel = 2; // TEMPORARY
+  end
  
 	always @(*) begin
-		case(instruction[6:0]) // R
-      7'b0110011: begin
-        addr_sel = 0;
+		case(instruction[6:2]) // R
+      `OPC_ARI_RTYPE_5: begin
 				ldx_sel = 0;
 				wb_sel = 1;
-        if (br_taken == 1 || jalr == 1) pc_sel = 3;
-        else if (jal == 1) pc_sel == 1; // testing this
-        else pc_sel = 2;
+        // if (br_taken == 1'b1 || jalr == 1'b1) pc_sel = 3;
+        // else if (jal == 1'b1) pc_sel == 1; // testing this
+        // else pc_sel = 2;
+        // pc_sel = 2;
         rf_we = 1;
       end
-      7'b0010011: begin // I and I*
-        addr_sel = 0;
+      `OPC_ARI_ITYPE_5: begin // I and I*
 				ldx_sel = 0;
 				wb_sel = 1;
-				if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+				// if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
         rf_we = 1;
       end
-      7'b0000011: begin // I type for load
-        addr_sel = 1; // DMEM for default stage right now
+      `OPC_LOAD_5: begin // I type for load
 				ldx_sel = 0;
 				wb_sel = 1;
         rf_we = 1;
-				if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+				// if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
         case(instruction[14:12])
           3'b000: ldx_sel = 3'b100; // lb
           3'b100: ldx_sel = 3'b011; // lbu
@@ -584,68 +592,67 @@ module WF_CU(instruction, rf_we, wb_sel, addr_sel, ldx_sel, pc_sel, br_taken, ja
           end
         endcase
       end
-      7'b0100011: begin // S-type (store)
-        addr_sel = 0;
+      `OPC_STORE_5: begin // S-type (store)
 				ldx_sel = 0;
 				wb_sel = 0;
-				if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+				// if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
         rf_we = 0;
       end
-      7'b1100011: begin // B-type
-        addr_sel = 0;
+      `OPC_BRANCH_5: begin // B-type
         ldx_sel = 0;
         wb_sel = 0;
         rf_we = 0;
-        if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
       end
-			7'b1101111: begin // J-Type
-        addr_sel = 0;
+			`OPC_JAL_5: begin // J-Type
         ldx_sel = 0;
         wb_sel = 2;
         rf_we = 1;
-        if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
       end
-      7'b1100111: begin // JALR
-        addr_sel = 0;
+      `OPC_JALR_5: begin // JALR
         ldx_sel = 0;
         wb_sel = 2;
         rf_we = 1;
-        if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
       end
-      7'b0010111: begin // U (AUIPC) Type
-        addr_sel = 0;
+      `OPC_AUIPC_5: begin // U (AUIPC) Type
         ldx_sel = 0;
         wb_sel = 1;
         rf_we = 1;
-        if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
       end
-      7'b0010111: begin // U (LUI) Type
-        addr_sel = 0;
+      `OPC_LUI_5: begin // U (LUI) Type
         ldx_sel = 0;
         wb_sel = 1;
         rf_we = 1;
-        if (br_taken == 1) pc_sel = 3;
-        else pc_sel = 2;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        // pc_sel = 2;
       end
 			default: begin
-				addr_sel = 0;
 				ldx_sel = 0;
 				wb_sel = 0;
-				pc_sel = 0;
+				// pc_sel = 0;
         rf_we = 0;
 			end
 		endcase
 	end
 endmodule // WF_CU
 
-module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel, br_taken, jalr);
+module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
 	input [31:0] instruction, pc;
-  input br_taken, jalr;
+  // input br_taken, jalr; need br_taken and jalr for later
 	output reg pc_thirty, nop_sel, orange_sel, green_sel;
 
 	assign pc_thirty = pc[30];
@@ -655,56 +662,65 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel, br_taken
       7'b0110011: begin
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b0010011: begin // I and I*
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b0000011: begin // I type for load
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b0100011: begin // S-type (store)
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b1100011: begin // B-type
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
 			7'b1101111: begin // J-Type
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b1100111: begin // JALR
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b0010111: begin // U (AUIPC) Type
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
       7'b0010111: begin // U (LUI) Type
         orange_sel = 0;
 				green_sel = 0;
-        if (br_taken || jalr) nop_sel = 1;
-        else nop_sel = 0;
+        // if (br_taken || jalr) nop_sel = 1;
+        // else nop_sel = 0;
+        nop_sel = 0;
       end
 			default: begin
 				orange_sel = 0;
@@ -715,15 +731,14 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel, br_taken
 	end
 endmodule // D_CU
 
-module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_sel, b_sel, rs2_sel, alu_sel, csr_sel, br_taken);
+module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_sel, rs2_sel, alu_sel, csr_sel);
 	input [31:0] instruction;
   input br_eq, br_lt;
 
 	output reg br_un, b_sel, csr_sel;
 	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
-	output reg [2:0] imm_sel;
 	output reg [3:0] alu_sel;
-  output reg br_taken;
+  // output reg br_taken; // add br_taken logic
  
 	always @(*) begin
 		case(instruction[6:0])
@@ -731,7 +746,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
 				orange_sel = 0; // forwarding
 				green_sel = 0; // forwarding
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0; // forwarding
 				b_sel = 0;
 				rs2_sel = 0;
@@ -757,7 +771,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 1;
 				rs2_sel = 0;
@@ -780,7 +793,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 1;
 				rs2_sel = 0;
@@ -791,7 +803,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 1;
 				rs2_sel = 0;
@@ -813,7 +824,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 0;
 				rs2_sel = 0;
@@ -824,7 +834,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 0;
 				rs2_sel = 0;
@@ -835,7 +844,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 1;
 				rs2_sel = 0;
@@ -846,7 +854,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 1;
 				rs2_sel = 0;
@@ -857,7 +864,6 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, imm_sel, a_
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				imm_sel = 0;
 				a_sel = 0;
 				b_sel = 0;
 				rs2_sel = 0;
