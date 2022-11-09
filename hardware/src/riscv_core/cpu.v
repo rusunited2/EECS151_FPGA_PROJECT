@@ -109,6 +109,7 @@ module cpu #(
 	// 1. WF ------------------------------------------------------
 
 	// 1.1: pc_mux
+    // TO DO: Call control logic for pc_mux_sel
 	wire [2:0] pc_mux_sel;
   	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3, pc_mux_in4;
 	wire pc_mux_out;
@@ -135,30 +136,27 @@ module cpu #(
 	);
 
 	// 1.3: pc_register
-	wire [31:0] pc_register_q, pc_register_d;
-	REGISTER #(
-        .N(32)
-    ) pc_register (
-        .q(pc_register_q),
-		.d(pc_register_d),
-		.clk(clk)
-    );
+	wire [31:0] pc_register_d;
+    reg [31:0] pc_register_q;
+    always(@posedge clk) begin
+        pc_register_q <= pc_register_d;
+    end
 
 	// Wiring for WF stage
-	assign pc_mux_out = pc_plus_four_in0;
-	assign pc_plus_four_out = pc_mux_in2;
+    assign pc_plus_four_in0 = pc_mux_out;
+    assign pc_mux_in2 = pc_plus_four_out;
 
-	assign pc_mux_out = pc_register_d;
-	assign pc_register_q = pc_mux_in4; 
+    assign pc_register_d = pc_mux_out;
+    assign pc_mux_in4 = pc_register_q;
 
-	assign pc_mux_out = bios_addra;
-	assign pc_mux_out = imem_addrb;
+    assign bios_addra = pc_mux_out;
+    assign imem_addrb = pc_mux_out;
 
 
 	// 2. D -------------------------------------------------------
 	wire pc_thirty_mux_sel;
   	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
-	wire pc_thirty_mux_out;
+	wire [31:0] pc_thirty_mux_out;
 	TWO_INPUT_MUX pc_thirty_mux (
 		.sel(pc_thirty_mux_sel),
 		.in0(pc_thirty_mux_in0),
@@ -168,19 +166,37 @@ module cpu #(
 
 	wire nop_mux_sel;
   	wire [31:0] nop_mux_in0, nop_mux_in1; // TODO: nop_mux_in1 needs to be the nop[31:0]
-	wire nop_mux_out;
+	wire [31:0] nop_mux_out;
 	TWO_INPUT_MUX nop_mux (
 		.sel(nop_mux_sel),
 		.in0(nop_mux_in0),
 		.in1(32'b0000_0000_0000_0000_0000_0000_0001_0011), // nop_mux_in1 = addi x0, x0, 0 = 00000000000000000000000000010011
 		.out(nop_mux_out)
 	);
+
+    wire [31:0] pc_decode_register_d;
+    reg [31:0] pc_decode_register_q;
+    always @(posedge clk) begin
+        pc_decode_register_q <= pc_decode_register_d;
+    end
+
+    wire [31:0] instruction_decode_register_d;
+    reg [31:0] instruction_decode_register_q;
+    always (@posedge clk) begin
+        instruction_decode_register_q <= instruction_decode_register_d;
+    end
 	
 	// Wiring for D stage
+    assign pc_decode_register_d = pc_register_q; // for pc pipeline register in decode stage
+
 	assign bios_douta = pc_thirty_mux_in0;
 	assign imem_doutb = pc_thirty_mux_in1;
 	
 	assign pc_thirty_mux_out = nop_mux_in0;
+
+    // wiring to regfile
+    assign ra1 = nop_mux_out[19:15];
+    assign ra2 = nop_mux_out[24:20];
 
 	// 3. X -------------------------------------------------------
 endmodule
