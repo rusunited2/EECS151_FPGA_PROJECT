@@ -444,7 +444,7 @@ module cpu #(
 
     wire [1:0] wb_mux_sel;
   	wire [31:0] wb_mux_in0, wb_mux_in1, wb_mux_in2, wb_mux_in3;
-	wire wb_mux_out;
+	wire [31:0] wb_mux_out;
 	FOUR_INPUT_MUX wb_mux (
 		.sel(wb_mux_sel),
 		.in0(wb_mux_in0),
@@ -545,9 +545,8 @@ module cpu #(
     assign wb_mux_in2 = pc_plus_four2_out;
 
     // writeback to regfile
-    assign wa = instruction_execute_register_q;
+    assign wa = instruction_execute_register_q[11:7];
     assign wd = wb_mux_out;
-
     
 
 
@@ -588,7 +587,7 @@ module cpu #(
 
     assign d_instruction = nop_mux_out;
     assign d_pc = pc_register_q;
-    assign pc_thirty_mux_sel = d_pc_thirty;
+    assign pc_thirty_mux_sel = 1; // TEMP
     assign nop_mux_sel = d_nop_sel;
     assign rs1_mux_sel = d_orange_sel;
     assign rs2_mux_sel = d_green_sel;
