@@ -29,8 +29,9 @@ module cpu #(
     // Synchronous write: write takes one cycle
     // Write-byte-enable: select which of the four bytes to write
     wire [13:0] dmem_addr;
-    wire [31:0] dmem_din, dmem_dout;
-    wire [3:0] dmem_we;
+    reg [31:0] dmem_din;
+	wire [31:0] dmem_dout;
+    reg [3:0] dmem_we;
     wire dmem_en;
     dmem dmem (
       .clk(clk),
@@ -476,7 +477,7 @@ module cpu #(
 
     // inputs to A-MUX
     assign a_mux_in0 = rs1_mux2_out;
-    assign a_mux_in1 = 0; // temp
+    assign a_mux_in1 = pc_decode_register_q; // temp
     assign a_mux_in2 = 0; // temp
 
     // inputs to B-MUX
@@ -509,9 +510,15 @@ module cpu #(
 
     // input to DMEM
     assign dmem_addr = alu_out[15:2];
-    assign dmem_din = rs2_mux3_out;
+
+	// Russel added this for tests 33-40 (store + LUI)
+	always @(*) begin
+		dmem_din = rs2_mux3_out << (8 * alu_out[1:0]);
+	end
+
+    //assign dmem_din = rs2_mux3_out;
+
     assign dmem_en = 1; // temp 0 for when you write
-    assign dmem_we = 4'b0000; // temp what are these values
     // output of dmem = dmem_dout
 
     // input to BIOS
@@ -627,4 +634,31 @@ module cpu #(
     assign rs2_mux3_sel = x_rs2_sel;
     assign alu_sel = x_alu_sel;
     assign csr_mux_sel = x_csr_sel;
+
+	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
+	always @(*) begin
+		if (x_instruction[6:0] == 7'b0100011) begin
+			if (alu_out[1:0] == 0) begin
+				case(x_instruction[14:12])
+    				3'b000: dmem_we = 4'b0001; // temp what are these values
+					3'b001: dmem_we = 4'b0011;
+					3'b010: dmem_we = 4'b1111;
+				endcase
+			end
+			else if (alu_out[1:0] == 1) begin
+				if(x_instruction[14:12] == 3'b000)
+    				dmem_we = 4'b0010; // temp what are these values
+			end
+			else if (alu_out[1:0] == 2) begin
+				case(x_instruction[14:12])
+    				3'b000: dmem_we = 4'b0100; // temp what are these values
+					3'b001: dmem_we = 4'b1100;
+				endcase
+			end
+			else if (alu_out[1:0] == 3) begin
+				if(x_instruction[14:12] == 3'b000)
+    				dmem_we = 4'b1000; // temp what are these values
+			end
+		end
+	end
 endmodule

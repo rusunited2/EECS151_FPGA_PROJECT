@@ -552,7 +552,6 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
 
   always @(*) begin
     if (rst) pc_sel = 0;
-    else pc_sel = 2; // TEMPORARY
   end
  
 	always @(*) begin
@@ -563,7 +562,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         // if (br_taken == 1'b1 || jalr == 1'b1) pc_sel = 3;
         // else if (jal == 1'b1) pc_sel == 1; // testing this
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
         rf_we = 1;
       end
       `OPC_ARI_ITYPE_5: begin // I and I*
@@ -571,7 +570,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
 				wb_sel = 1;
 				// if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
         rf_we = 1;
       end
       `OPC_LOAD_5: begin // I type for load
@@ -580,7 +579,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         rf_we = 1;
 				// if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
         case(instruction[14:12])
           3'b000: ldx_sel = 3'b100; // lb
           3'b100: ldx_sel = 3'b011; // lbu
@@ -597,7 +596,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
 				wb_sel = 0;
 				// if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
         rf_we = 0;
       end
       `OPC_BRANCH_5: begin // B-type
@@ -614,7 +613,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         rf_we = 1;
         // if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 3;
       end
       `OPC_JALR_5: begin // JALR
         ldx_sel = 0;
@@ -622,7 +621,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         rf_we = 1;
         // if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 3;
       end
       `OPC_AUIPC_5: begin // U (AUIPC) Type
         ldx_sel = 0;
@@ -630,7 +629,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         rf_we = 1;
         // if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
       end
       `OPC_LUI_5: begin // U (LUI) Type
         ldx_sel = 0;
@@ -638,7 +637,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         rf_we = 1;
         // if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
-        // pc_sel = 2;
+        pc_sel = 2;
       end
 			default: begin
 				ldx_sel = 0;
@@ -827,8 +826,8 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				a_sel = 0;
-				b_sel = 0;
+				a_sel = 1;
+				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -847,7 +846,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
-				a_sel = 0;
+				a_sel = 1;
 				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
