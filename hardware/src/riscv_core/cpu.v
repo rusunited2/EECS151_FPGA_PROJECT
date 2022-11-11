@@ -501,8 +501,9 @@ module cpu #(
     assign rs2_mux3_in2 = 0; // temp
 
     // send ALU result back to PC_SEL MUX
-    assign pc_mux_in3 = alu_out;
+    assign pc_mux_in3 = alu_register_q;
 
+	// Input to ldx for lw, lh and lb
 	assign ldx_alu_out = alu_register_q;
 
     // --------------------------------------------MEMORY ASSIGNS
@@ -564,13 +565,15 @@ module cpu #(
     wire wf_rf_we;
     wire [1:0] wf_wb_sel;
     wire [2:0] wf_ldx_sel, wf_pc_sel;
+	wire wf_br_taken;
     WF_CU wf_cu (
         .rst(rst),
         .instruction(wf_instruction), 
         .rf_we(wf_rf_we), 
         .wb_sel(wf_wb_sel), 
         .ldx_sel(wf_ldx_sel), 
-        .pc_sel(wf_pc_sel)
+        .pc_sel(wf_pc_sel),
+		.br_taken(wf_br_taken)
     );
 
     assign wf_instruction = instruction_execute_register_q; // check this if reset we need to change control logic
@@ -608,6 +611,7 @@ module cpu #(
     wire x_br_un, x_b_sel, x_csr_sel;
     wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel;
     wire [3:0] x_alu_sel;
+	wire x_br_taken;
     X_CU x_cu (
         .instruction(x_instruction), 
         .orange_sel(x_orange_sel), 
@@ -619,7 +623,8 @@ module cpu #(
         .b_sel(x_b_sel), 
         .rs2_sel(x_rs2_sel), 
         .alu_sel(x_alu_sel), 
-        .csr_sel(x_csr_sel)
+        .csr_sel(x_csr_sel),
+		.br_taken(x_br_taken)
     );
 
     // EX Control Logic wires
@@ -634,6 +639,7 @@ module cpu #(
     assign rs2_mux3_sel = x_rs2_sel;
     assign alu_sel = x_alu_sel;
     assign csr_mux_sel = x_csr_sel;
+	assign wf_br_taken = x_br_taken;
 
 	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
 	always @(*) begin

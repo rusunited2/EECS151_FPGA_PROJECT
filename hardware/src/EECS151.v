@@ -541,10 +541,11 @@ module ASYNC_RAM_1W2R(d0, addr0, we0, q1, addr1, q2, addr2, clk);
 
 endmodule // ASYNC_RAM_1W2R
 
-module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
+module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel, br_taken);
   // needs branch logic, jalr, and jal (as inputs)
   input rst;
 	input [31:0] instruction;
+  input br_taken;
   // input br_taken, jalr, jal;
 	output reg rf_we;
   output reg [1:0] wb_sel;
@@ -603,8 +604,8 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         ldx_sel = 0;
         wb_sel = 0;
         rf_we = 0;
-        // if (br_taken == 1) pc_sel = 3;
-        // else pc_sel = 2;
+        if (br_taken == 1) pc_sel = 3;
+        else pc_sel = 2;
         // pc_sel = 2;
       end
 			`OPC_JAL_5: begin // J-Type
@@ -639,6 +640,14 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
         // else pc_sel = 2;
         pc_sel = 2;
       end
+	  7'b1110011: begin // CSRR
+        ldx_sel = 0;
+        wb_sel = 0;
+        rf_we = 0;
+        // if (br_taken == 1) pc_sel = 3;
+        // else pc_sel = 2;
+        pc_sel = 2;
+	  end
 			default: begin
 				ldx_sel = 0;
 				wb_sel = 0;
@@ -721,6 +730,11 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
         // else nop_sel = 0;
         nop_sel = 0;
       end
+	  7'b1110011: begin // CSRR
+	  	orange_sel = 0;
+		green_sel = 0;
+		nop_sel = 0;
+	  end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;
@@ -730,14 +744,14 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
 	end
 endmodule // D_CU
 
-module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_sel, rs2_sel, alu_sel, csr_sel);
+module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_sel, rs2_sel, alu_sel, csr_sel, br_taken);
 	input [31:0] instruction;
   input br_eq, br_lt;
 
 	output reg br_un, b_sel, csr_sel;
 	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
 	output reg [3:0] alu_sel;
-  // output reg br_taken; // add br_taken logic
+    output reg br_taken; // add br_taken logic
  
 	always @(*) begin
 		case(instruction[6:0])
@@ -816,8 +830,8 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				green_sel = 0;
         if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) br_un = 1;
         else br_un = 0;
-				a_sel = 0;
-				b_sel = 0;
+				a_sel = 1;
+				b_sel = 1;
 				rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
@@ -862,6 +876,28 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
+	  7'b1110011: begin // CSRR
+	  	        if (instruction[14:2] == 3'b001) begin // CSRRW
+        			orange_sel = 0;
+					green_sel = 0;
+					br_un = 0;
+					a_sel = 0;
+					b_sel = 1;
+					rs2_sel = 0;
+					alu_sel = 0;
+					csr_sel = 1;
+				end
+				else if (instruction[14:2] == 3'b101) begin // CSRRWI
+        			orange_sel = 0;
+					green_sel = 0;
+					br_un = 0;
+					a_sel = 0;
+					b_sel = 1;
+					rs2_sel = 0;
+					alu_sel = 0;
+					csr_sel = 0;
+				end
+	  end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;
@@ -873,5 +909,36 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				csr_sel = 0;
 			end
 		endcase
+	end
+
+	always @(*) begin
+		if (instruction[6:0] == 7'b1100011) begin // If it is a branch inst
+			case(instruction[14:12])
+				3'b000: begin // beq
+					if (br_eq) br_taken = 1;
+					else br_taken = 0;
+				end
+				3'b101: begin // bge
+					if (!br_lt) br_taken = 1;
+					else br_taken = 0;
+				end
+				3'b111: begin // bgeu
+					if (!br_lt) br_taken = 1;
+					else br_taken = 0;
+				end
+				3'b100: begin // blt
+					if (br_lt) br_taken = 1;
+					else br_taken = 0;
+				end
+				3'b110: begin // bltu
+					if (br_lt) br_taken = 1;
+					else br_taken = 0;
+				end
+				3'b001: begin // bne
+					if (!br_eq) br_taken = 1;
+					else br_taken = 0;
+				end
+			endcase
+		end
 	end
 endmodule // X_CU
