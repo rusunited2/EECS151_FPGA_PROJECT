@@ -428,10 +428,12 @@ module cpu #(
     wire [31:0] ldx_in;
     wire [2:0] ldx_sel;
     wire [31:0] ldx_out;
+	wire [31:0] ldx_alu_out;
     LDX ldx (
         .ldx_in(ldx_in), 
         .ldx_sel(ldx_sel), 
-        .ldx_out(ldx_out)
+        .ldx_out(ldx_out),
+		.alu_out(ldx_alu_out)
     );
 
     wire [31:0] pc_plus_four2_in0;
@@ -500,7 +502,7 @@ module cpu #(
     // send ALU result back to PC_SEL MUX
     assign pc_mux_in3 = alu_out;
 
-
+	assign ldx_alu_out = alu_register_q;
 
     // --------------------------------------------MEMORY ASSIGNS
 

@@ -124,18 +124,44 @@ module IMM_GEN(inst, imm);
   end
 endmodule
 
-module LDX(ldx_in, ldx_sel, ldx_out);
+module LDX(ldx_in, ldx_sel, ldx_out, alu_out);
 	input [31:0] ldx_in;
 	input [2:0] ldx_sel;
+	input [31:0] alu_out;
 	output reg [31:0] ldx_out;
 
 	always @(*) begin
-		case(ldx_sel)
-			3'b000: ldx_out = ldx_in; // load word
-			3'b001: ldx_out = {{16{1'b0}}, ldx_in[15:0]}; // lhu
-			3'b010: ldx_out = {{16{ldx_in[15]}}, ldx_in[15:0]}; // lh
-			3'b011: ldx_out = {{24{1'b0}}, ldx_in[7:0]}; // lbu
-			3'b100: ldx_out = {{24{ldx_in[7]}}, ldx_in[7:0]}; // lb
-		endcase
+		if (alu_out[1:0] == 0) begin
+			case(ldx_sel)
+				3'b000: ldx_out = ldx_in; // load word
+				3'b001: ldx_out = {{16{1'b0}}, ldx_in[15:0]}; // lhu
+				3'b010: ldx_out = {{16{ldx_in[15]}}, ldx_in[15:0]}; // lh
+				3'b011: ldx_out = {{24{1'b0}}, ldx_in[7:0]}; // lbu
+				3'b100: ldx_out = {{24{ldx_in[7]}}, ldx_in[7:0]}; // lb
+			endcase
+		end
+		else if (alu_out[1:0] == 1) begin
+			case(ldx_sel)
+				// not sure if LH can have offset of one
+				3'b001: ldx_out = {{16{1'b0}}, ldx_in[23:8]}; // lhu
+				3'b010: ldx_out = {{16{ldx_in[23]}}, ldx_in[23:8]}; // lh
+				3'b011: ldx_out = {{24{1'b0}}, ldx_in[15:8]}; // lbu
+				3'b100: ldx_out = {{24{ldx_in[15]}}, ldx_in[15:8]}; // lb
+			endcase
+		end
+		else if (alu_out[1:0] == 2) begin
+			case(ldx_sel)
+				3'b001: ldx_out = {{16{1'b0}}, ldx_in[31:16]}; // lhu
+				3'b010: ldx_out = {{16{ldx_in[31]}}, ldx_in[31:16]}; // lh
+				3'b011: ldx_out = {{24{1'b0}}, ldx_in[23:16]}; // lbu
+				3'b100: ldx_out = {{24{ldx_in[23]}}, ldx_in[23:16]}; // lb
+			endcase
+		end
+		else if (alu_out[1:0] == 3) begin
+			case(ldx_sel)
+				3'b011: ldx_out = {{24{1'b0}}, ldx_in[31:24]}; // lbu
+				3'b100: ldx_out = {{24{ldx_in[31]}}, ldx_in[31:24]}; // lb
+			endcase
+		end
 	end
 endmodule;
