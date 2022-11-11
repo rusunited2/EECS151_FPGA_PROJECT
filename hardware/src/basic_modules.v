@@ -70,15 +70,15 @@ module ALU(alu_sel, rs1, rs2, out);
   
   always @(*) begin
 	case(alu_sel)
-	  4'b0000: out = rs1 + rs2;
-	  4'b0001: out = rs1 - rs2;
-	  4'b0010: out = rs1 & rs2;
-	  4'b0011: out = rs1 | rs2;
-	  4'b0100: out = rs1 ^ rs2;
-	  4'b0101: out = rs1 << rs2[4:0];
-	  4'b0110: out = rs1 >> rs2[4:0];
-	  4'b0111: out = $signed(rs1) >>> rs2[4:0];
-	  4'b1000: out = (rs1 < rs2) ? $signed(1) : 0; // slt
+	  4'b0000: out = rs1 + rs2; // add
+	  4'b0001: out = rs1 - rs2; // sub
+	  4'b0010: out = rs1 & rs2; // and
+	  4'b0011: out = rs1 | rs2; // or
+	  4'b0100: out = rs1 ^ rs2; // xor
+	  4'b0101: out = rs1 << rs2[4:0]; // sll
+	  4'b0110: out = rs1 >> rs2[4:0]; // does this zero extend? srl
+	  4'b0111: out = $signed(rs1) >>> rs2[4:0]; // sra
+	  4'b1000: out = ($signed(rs1) < $signed(rs2)) ? 1 : 0; // slt
 	  4'b1001: out = (rs1 < rs2) ? 1 : 0; // sltu
 	  default: out = 0; // For error/default case
 	endcase
@@ -107,13 +107,18 @@ module IMM_GEN(inst, imm);
   output reg [31:0] imm;
 
   always @(*) begin
-	case(inst[6:0])
-		7'b0010011: imm = {{20{inst[31]}}, inst[31:20]}; // I-type instruction
-		7'b0100011: imm = {{20{inst[31]}}, inst[31:25], inst[11:7]}; // S-type instruction
-		7'b1100011: imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0}; // SB-type instruction
-		7'b1101111: imm = {{20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0}; // J-type instruction
-		7'b0010111: imm = {inst[31:12], {12{1'b0}}}; // AUIPC instruction (what to do with bottom bits)
-		7'b0110111: imm = {inst[31:12], {12{1'b0}}}; // LUI instruction
+	case(inst[6:2])
+		`OPC_LOAD_5: imm = {{20{inst[31]}}, inst[31:20]};
+		`OPC_ARI_ITYPE_5: begin
+			if (inst[14:12] == 3'b001 || inst[14:12] == 3'b101) imm = {{27{1'b0}}, inst[24:20]};
+			else imm = {{20{inst[31]}}, inst[31:20]}; // I-type instruction
+		end
+		`OPC_STORE_5: imm = {{20{inst[31]}}, inst[31:25], inst[11:7]}; // S-type instruction
+		`OPC_BRANCH_5: imm = {{20{inst[31]}}, inst[7], inst[30:25], inst[11:8], 1'b0}; // B-type instruction
+		`OPC_JAL_5: imm = {{20{inst[31]}}, inst[19:12], inst[20], inst[30:21], 1'b0}; // J-type instruction
+		`OPC_AUIPC_5: imm = {inst[31:12], {12{1'b0}}}; // AUIPC instruction (what to do with bottom bits)
+		`OPC_LUI_5: imm = {inst[31:12], {12{1'b0}}}; // LUI instruction
+		`OPC_JALR_5: imm = {{20{inst[31]}}, inst[31:20]};
 		default: imm = 32'd0;
 	endcase
   end

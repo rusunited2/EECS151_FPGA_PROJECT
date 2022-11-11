@@ -111,7 +111,7 @@ module cpu #(
 	// 1.1: pc_mux
 	wire [2:0] pc_mux_sel;
   	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3, pc_mux_in4;
-	wire pc_mux_out;
+	wire [31:0] pc_mux_out;
 	EIGHT_INPUT_MUX pc_mux (
 		.sel(pc_mux_sel),
 		.in0(pc_mux_in0),
@@ -142,17 +142,17 @@ module cpu #(
     end
 
 	// Wiring for WF stage
-    assign pc_plus_four_in0 = pc_mux_out;
+    assign pc_plus_four_in0 = pc_register_q; // Changed Nov 10
     assign pc_mux_in2 = pc_plus_four_out;
     assign pc_mux_in0 = RESET_PC;
 
     assign pc_register_d = pc_mux_out;
     assign pc_mux_in4 = pc_register_q;
 
-    assign bios_addra = rst ? RESET_PC : pc_mux_out;
-    assign imem_addrb = rst ? RESET_PC : pc_mux_out;
+    assign bios_addra = pc_mux_out[15:2];
+    assign imem_addrb = pc_mux_out[15:2];
 
-    assign bios_ena = 1;
+    assign bios_ena = 1; // FIX THIS
 	// 2. D -------------------------------------------------------
 	wire pc_thirty_mux_sel;
   	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
@@ -228,8 +228,8 @@ module cpu #(
 	);
 	
 	// Wiring for D stage
-	assign pc_thirty_mux_in0 = bios_douta;
-	assign pc_thirty_mux_in1 = imem_doutb;
+	assign pc_thirty_mux_in0 = imem_doutb;
+	assign pc_thirty_mux_in1 = bios_douta;
 	
 	assign nop_mux_in0 = pc_thirty_mux_out;
 
@@ -402,7 +402,7 @@ module cpu #(
     
     reg [1:0] addr_mux_sel;
   	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
-	wire addr_mux_out;
+	wire [31:0] addr_mux_out;
 	FOUR_INPUT_MUX addr (
 		.sel(addr_mux_sel),
 		.in0(addr_mux_in0),
@@ -508,12 +508,12 @@ module cpu #(
     // input to DMEM
     assign dmem_addr = alu_out[15:2];
     assign dmem_din = rs2_mux3_out;
-    assign dmem_en = 0; // temp
-    assign dmem_we = 4'b1111; // temp
+    assign dmem_en = 1; // temp 0 for when you write
+    assign dmem_we = 4'b0000; // temp what are these values
     // output of dmem = dmem_dout
 
     // input to BIOS
-    assign bios_addrb = alu_out;
+    assign bios_addrb = alu_out[13:2];
     assign bios_enb = 0; // temp
 
     // input to IMEM
@@ -564,7 +564,7 @@ module cpu #(
         .pc_sel(wf_pc_sel)
     );
 
-    assign wf_instruction = instruction_execute_register_q; // check this
+    assign wf_instruction = instruction_execute_register_q; // check this if reset we need to change control logic
     assign we = wf_rf_we;
     assign wb_mux_sel = wf_wb_sel;
     assign ldx_sel = wf_ldx_sel;
@@ -587,7 +587,7 @@ module cpu #(
 
     assign d_instruction = nop_mux_out;
     assign d_pc = pc_register_q;
-    assign pc_thirty_mux_sel = 1; // TEMP
+    assign pc_thirty_mux_sel = d_pc_thirty; // TEMP (FIX THIS)
     assign nop_mux_sel = d_nop_sel;
     assign rs1_mux_sel = d_orange_sel;
     assign rs2_mux_sel = d_green_sel;
@@ -613,6 +613,7 @@ module cpu #(
         .csr_sel(x_csr_sel)
     );
 
+    // EX Control Logic wires
     assign x_instruction = instruction_decode_register_q;
     assign x_br_eq = branch_comp_br_eq;
     assign x_br_lt = branch_comp_br_lt;
@@ -624,5 +625,4 @@ module cpu #(
     assign rs2_mux3_sel = x_rs2_sel;
     assign alu_sel = x_alu_sel;
     assign csr_mux_sel = x_csr_sel;
-
 endmodule

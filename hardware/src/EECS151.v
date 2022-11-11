@@ -576,7 +576,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel);
       end
       `OPC_LOAD_5: begin // I type for load
 				ldx_sel = 0;
-				wb_sel = 1;
+				wb_sel = 0;
         rf_we = 1;
 				// if (br_taken == 1) pc_sel = 3;
         // else pc_sel = 2;
@@ -764,6 +764,9 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
           end
           3'b010: alu_sel = 4'b1000;
           3'b011: alu_sel = 4'b1001;
+          default: begin
+            alu_sel = 4'b0000;
+          end
         endcase
 				csr_sel = 0;
 			end
@@ -781,7 +784,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
           3'b100: alu_sel = 4'b0100; // xori
           3'b001: alu_sel = 4'b0101; // slli
           3'b101: begin
-            if (instruction[31:25] == 7'b0010011) alu_sel = 4'b0110; // srli
+            if (instruction[31:25] == 7'b0000000) alu_sel = 4'b0110; // srli
             else alu_sel = 4'b0111; // srai
           end
           3'b010: alu_sel = 4'b1000; // slti
