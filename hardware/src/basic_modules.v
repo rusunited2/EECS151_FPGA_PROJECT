@@ -119,7 +119,8 @@ module IMM_GEN(inst, imm);
 		`OPC_AUIPC_5: imm = {inst[31:12], {12{1'b0}}}; // AUIPC instruction (what to do with bottom bits)
 		`OPC_LUI_5: imm = {inst[31:12], {12{1'b0}}}; // LUI instruction
 		`OPC_JALR_5: imm = {{20{inst[31]}}, inst[31:20]};
-		default: imm = 32'd0;
+		5'b11100: imm = {{27{1'b0}}, inst[19:15]}; // CSR
+		default: imm = 32'b0; // CSR
 	endcase
   end
 endmodule

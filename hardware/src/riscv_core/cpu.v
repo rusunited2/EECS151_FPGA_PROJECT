@@ -469,7 +469,12 @@ module cpu #(
 
     // rs1_mux2 inputs
 	assign rs1_mux2_in0 = rs1_register_q;
+	assign rs1_mux2_in1 = alu_register_q; // ALU->ALU forwarding
+	assign rs1_mux2_in2 = ldx_out; // MEM->ALU forwarding
+
 	assign rs2_mux2_in0 = rs2_register_q;
+	assign rs2_mux2_in1 = alu_register_q; // ALU->ALU forwarding
+	assign rs2_mux2_in2 = ldx_out; // MEM->ALU forwarding
 
     // inputs to branch comparator
     assign branch_comp_rs1 = rs1_mux2_out;
@@ -606,7 +611,7 @@ module cpu #(
 
     
     // ------------------- EX CONTROL LOGIC
-    wire [31:0] x_instruction;
+    wire [31:0] x_instruction, wf_instruction;
     wire x_br_eq, x_br_lt;
     wire x_br_un, x_b_sel, x_csr_sel;
     wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel;
@@ -624,7 +629,8 @@ module cpu #(
         .rs2_sel(x_rs2_sel), 
         .alu_sel(x_alu_sel), 
         .csr_sel(x_csr_sel),
-		.br_taken(x_br_taken)
+		.br_taken(x_br_taken),
+		.wf_instruction(wf_instruction)
     );
 
     // EX Control Logic wires
@@ -640,6 +646,7 @@ module cpu #(
     assign alu_sel = x_alu_sel;
     assign csr_mux_sel = x_csr_sel;
 	assign wf_br_taken = x_br_taken;
+	assign wf_instruction = instruction_execute_register_q;
 
 	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
 	always @(*) begin
