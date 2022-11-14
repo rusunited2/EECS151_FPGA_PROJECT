@@ -582,11 +582,11 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel, br_taken);
         // else pc_sel = 2;
         pc_sel = 2;
         case(instruction[14:12])
-          3'b000: ldx_sel = 3'b100; // lb
-          3'b100: ldx_sel = 3'b011; // lbu
-          3'b001: ldx_sel = 3'b010; // lh
-          3'b101: ldx_sel = 3'b001; // lhu
-          3'b010: ldx_sel = 3'b000; // lw
+          `FNC_LB: ldx_sel = 3'b100; // lb
+          `FNC_LBU: ldx_sel = 3'b011; // lbu
+          `FNC_LH: ldx_sel = 3'b010; // lh
+          `FNC_LHU: ldx_sel = 3'b001; // lhu
+          `FNC_LW: ldx_sel = 3'b000; // lw
           default: begin
             ldx_sel = 3'b000;
           end
@@ -640,7 +640,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel, br_taken);
         // else pc_sel = 2;
         pc_sel = 2;
       end
-	  7'b1110011: begin // CSRR
+	    7'b11100: begin // CSRR
         ldx_sel = 0;
         wb_sel = 0;
         rf_we = 0;
@@ -666,75 +666,75 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel);
 	assign pc_thirty = pc[30];
  
 	always @(*) begin
-		case(instruction[6:0]) // Assuming no 2-cycle hazard
-      7'b0110011: begin
+		case(instruction[6:2]) // Assuming no 2-cycle hazard
+      `OPC_ARI_RTYPE_5: begin
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b0010011: begin // I and I*
+      `OPC_ARI_ITYPE_5: begin // I and I*
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b0000011: begin // I type for load
+      `OPC_LOAD_5: begin // I type for load
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b0100011: begin // S-type (store)
+      `OPC_STORE_5: begin // S-type (store)
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b1100011: begin // B-type
+      `OPC_BRANCH_5: begin // B-type
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-			7'b1101111: begin // J-Type
+			`OPC_JAL_5: begin // J-Type
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b1100111: begin // JALR
+      `OPC_JALR_5: begin // JALR
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b0010111: begin // U (AUIPC) Type
+      `OPC_AUIPC_5: begin // U (AUIPC) Type
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-      7'b0010111: begin // U (LUI) Type
+      `OPC_LUI_5: begin // U (LUI) Type
         orange_sel = 0;
 				green_sel = 0;
         // if (br_taken || jalr) nop_sel = 1;
         // else nop_sel = 0;
         nop_sel = 0;
       end
-	  7'b1110011: begin // CSRR
-	  	orange_sel = 0;
-		green_sel = 0;
-		nop_sel = 0;
-	  end
+	    7'b11100: begin // CSRR
+	  	  orange_sel = 0;
+		    green_sel = 0;
+		    nop_sel = 0;
+	    end
 			default: begin
 				orange_sel = 0;
 				green_sel = 0;
@@ -751,7 +751,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 	output reg br_un, b_sel, csr_sel;
 	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
 	output reg [3:0] alu_sel;
-    output reg br_taken; // add br_taken logic
+  output reg br_taken; // add br_taken logic
 
 	always @(*) begin
 		case(instruction[6:2])
@@ -815,8 +815,8 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 	end
  
 	always @(*) begin
-		case(instruction[6:0])
-			7'b0110011: begin // If R-type AKA type = 0
+		case(instruction[6:2])
+			`OPC_ARI_RTYPE_5: begin // If R-type AKA type = 0
 				orange_sel = 0; // forwarding
 				green_sel = 0; // forwarding
 				br_un = 0;
@@ -824,27 +824,27 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				b_sel = 0;
 				rs2_sel = 0;
 				case(instruction[14:12])
-          3'b000: begin
-            if (instruction[31:25] == 7'b0100000) alu_sel = 4'b0001;
+          `FNC_ADD_SUB: begin // add 
+            if (instruction[30] == `FNC2_SUB) alu_sel = 4'b0001;
             else alu_sel = 4'b0000;
           end
-          3'b111: alu_sel = 4'b0010;
-          3'b110: alu_sel = 4'b0011;
-          3'b100: alu_sel = 4'b0100;
-          3'b001: alu_sel = 4'b0101;
-          3'b101: begin
-            if (instruction[31:25] == 7'b0100000) alu_sel = 4'b0111;
-            else alu_sel = 4'b0110;
+          `FNC_AND: alu_sel = 4'b0010; // and
+          `FNC_OR: alu_sel = 4'b0011; // or
+          `FNC_XOR: alu_sel = 4'b0100; // xor
+          `FNC_SLL: alu_sel = 4'b0101; // sll
+          `FNC_SRL_SRA: begin // srl and sra
+            if (instruction[30] == `FNC2_SRA) alu_sel = 4'b0111; // sra
+            else alu_sel = 4'b0110; // srl
           end
-          3'b010: alu_sel = 4'b1000;
-          3'b011: alu_sel = 4'b1001;
+          `FNC_SLT: alu_sel = 4'b1000; // slt
+          `FNC_SLTU: alu_sel = 4'b1001; // sltu
           default: begin
             alu_sel = 4'b0000;
           end
         endcase
 				csr_sel = 0;
 			end
-			7'b0010011: begin // If I-type (I and I*)
+			`OPC_ARI_ITYPE_5: begin // If I-type (I and I*)
 				orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -852,21 +852,21 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				b_sel = 1;
 				rs2_sel = 0;
 				case(instruction[14:12])
-          3'b000: alu_sel = 4'b0000; // addi
-          3'b111: alu_sel = 4'b0010; // andi
-          3'b110: alu_sel = 4'b0011; // ori
-          3'b100: alu_sel = 4'b0100; // xori
-          3'b001: alu_sel = 4'b0101; // slli
-          3'b101: begin
-            if (instruction[31:25] == 7'b0000000) alu_sel = 4'b0110; // srli
+          `FNC_ADD_SUB: alu_sel = 4'b0000; // addi
+          `FNC_AND: alu_sel = 4'b0010; // andi
+          `FNC_OR: alu_sel = 4'b0011; // ori
+          `FNC_XOR: alu_sel = 4'b0100; // xori
+          `FNC_SLL: alu_sel = 4'b0101; // slli
+          `FNC_SRL_SRA: begin
+            if (instruction[30] == `FNC2_SRL) alu_sel = 4'b0110; // srli
             else alu_sel = 4'b0111; // srai
           end
-          3'b010: alu_sel = 4'b1000; // slti
-          3'b011: alu_sel = 4'b1001; // sltiu
+          `FNC_SLT: alu_sel = 4'b1000; // slti
+          `FNC_SLTU: alu_sel = 4'b1001; // sltiu
         endcase
 				csr_sel = 0;
 			end
-      7'b0000011: begin // load (I type)
+      `OPC_LOAD_5: begin // load (I type)
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -876,7 +876,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
         alu_sel = 4'b0000;
         csr_sel = 0;
       end
-      7'b0100011: begin // S type
+      `OPC_STORE_5: begin // S type
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -886,7 +886,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
-			7'b1100011: begin // B-type
+			`OPC_BRANCH_5: begin // B-type
 				orange_sel = 0;
 				green_sel = 0;
         if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) br_un = 1;
@@ -897,7 +897,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
 			end
-      7'b1101111: begin // J type (jal)
+      `OPC_JAL_5: begin // J type (jal)
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -907,7 +907,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
-      7'b1100111: begin // JALR (I type)
+      `OPC_JALR_5: begin // JALR (I type)
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -917,7 +917,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
-      7'b0010111: begin // AUIPC
+      `OPC_AUIPC_5: begin // AUIPC
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -927,7 +927,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
-      7'b0110111: begin // LUI
+      `OPC_LUI_5: begin // LUI
         orange_sel = 0;
 				green_sel = 0;
 				br_un = 0;
@@ -937,9 +937,9 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				alu_sel = 0;
 				csr_sel = 0;
       end
-	  7'b1110011: begin // CSRR
-	  	        if (instruction[14:12] == 3'b001) begin // CSRRW
-        			orange_sel = 0;
+	    5'b11100: begin // CSRR
+	  	  if (instruction[14:12] == 3'b001) begin // CSRRW
+        	orange_sel = 0;
 					green_sel = 0;
 					br_un = 0;
 					a_sel = 0;
@@ -949,7 +949,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 					csr_sel = 1;
 				end
 				else if (instruction[14:12] == 3'b101) begin // CSRRWI
-        			orange_sel = 0;
+        	orange_sel = 0;
 					green_sel = 0;
 					br_un = 0;
 					a_sel = 0;
@@ -975,27 +975,27 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 	always @(*) begin
 		if (instruction[6:0] == 7'b1100011) begin // If it is a branch inst
 			case(instruction[14:12])
-				3'b000: begin // beq
+				`FNC_BEQ: begin // beq
 					if (br_eq) br_taken = 1;
 					else br_taken = 0;
 				end
-				3'b101: begin // bge
+				`FNC_BGE: begin // bge
 					if (!br_lt) br_taken = 1;
 					else br_taken = 0;
 				end
-				3'b111: begin // bgeu
+				`FNC_BGEU: begin // bgeu
 					if (!br_lt) br_taken = 1;
 					else br_taken = 0;
 				end
-				3'b100: begin // blt
+				`FNC_BLT: begin // blt
 					if (br_lt) br_taken = 1;
 					else br_taken = 0;
 				end
-				3'b110: begin // bltu
+				`FNC_BLTU: begin // bltu
 					if (br_lt) br_taken = 1;
 					else br_taken = 0;
 				end
-				3'b001: begin // bne
+				`FNC_BNE: begin // bne
 					if (!br_eq) br_taken = 1;
 					else br_taken = 0;
 				end
