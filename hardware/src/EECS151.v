@@ -753,66 +753,34 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 	output reg [3:0] alu_sel;
   output reg br_taken; // add br_taken logic
 
-	always @(*) begin
-		case(instruction[6:2])
-			`OPC_ARI_RTYPE_5: begin
-				case(wf_instruction[6:2])
-					`OPC_ARI_RTYPE_5: begin // if R (x) and R (WF)
-						if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
-							orange_sel = 1;
-							green_sel = 0;
-						end
-						else if(wf_instruction[11:7] == instruction[24:20]) begin // WF_rd == X_rs2
-							green_sel = 1;
-							orange_sel = 0;
-						end
-						else begin
-							orange_sel = 0;
-							green_sel = 0;
-						end
-					end
-					`OPC_ARI_ITYPE_5: begin // if R (x) and I (WF)
-						if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
-							orange_sel = 1;
-							green_sel = 0;
-						end
-						else if(wf_instruction[11:7] == instruction[24:20]) begin // WF_rd == X_rs2
-							green_sel = 1;
-							orange_sel = 0;
-						end
-						else begin
-							orange_sel = 0;
-							green_sel = 0;
-						end
-					end
-				endcase
-			end
-			`OPC_ARI_ITYPE_5: begin
-				case(wf_instruction[6:2])
-					`OPC_ARI_RTYPE_5: begin // if I (x) and R (WF)
-						if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
-							orange_sel = 1;
-							green_sel = 0;
-						end
-						else begin
-							orange_sel = 0;
-							green_sel = 0;
-						end
-					end
-					`OPC_ARI_ITYPE_5: begin // if I (x) and I (WF)
-						if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
-							orange_sel = 1;
-							green_sel = 0;
-						end
-						else begin
-							orange_sel = 0;
-							green_sel = 0;
-						end
-					end
-				endcase
-			end
-		endcase
-	end
+  always @(*) begin
+    case(wf_instruction[6:2])
+      `OPC_ARI_RTYPE_5: begin
+        if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
+					orange_sel = 1;
+					green_sel = 0;
+				end
+        else if(wf_instruction[11:7] == instruction[24:20]) begin // WF_rd == X_rs2
+					green_sel = 1;
+					orange_sel = 0;
+				end
+        else begin
+					orange_sel = 0;
+					green_sel = 0;
+				end
+      end
+      `OPC_ARI_ITYPE_5: begin
+        if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
+					orange_sel = 1;
+					green_sel = 0;
+				end
+				else begin
+					orange_sel = 0;
+					green_sel = 0;
+				end
+      end
+    endcase
+  end
  
 	always @(*) begin
 		case(instruction[6:2])
