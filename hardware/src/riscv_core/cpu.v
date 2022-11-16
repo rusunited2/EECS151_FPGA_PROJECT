@@ -517,6 +517,11 @@ module cpu #(
 	// Input to ldx for lw, lh and lb
 	assign ldx_alu_out = alu_register_q;
 
+
+    // FORWARD DATA D TO RS1_MUX and RS2_MUX
+    assign rs1_mux_in1 = wb_mux_out;
+    assign rs2_mux_in1 = wb_mux_out;
+
     // --------------------------------------------MEMORY ASSIGNS
 
 
@@ -629,9 +634,11 @@ module cpu #(
     // ------------------ D CONTROL LOGIC
     wire [31:0] d_instruction;
     wire [31:0] d_pc;
+    wire [31:0] d_wf_instruction;
     wire d_pc_thirty, d_nop_sel, d_orange_sel, d_green_sel;
     wire d_jalr;
     wire d_br_taken;
+    wire d_rf_we;
     D_CU d_cu (
         .instruction(d_instruction), 
         .pc(d_pc), 
@@ -640,7 +647,9 @@ module cpu #(
         .orange_sel(d_orange_sel), 
         .green_sel(d_green_sel),
         .jalr(d_jalr),
-        .br_taken(d_br_taken)
+        .br_taken(d_br_taken),
+        .wf_instruction(d_wf_instruction),
+        .rf_we(d_rf_we)
     );
 
     assign d_instruction = nop_mux_out;
@@ -650,6 +659,8 @@ module cpu #(
     assign rs1_mux_sel = d_orange_sel;
     assign rs2_mux_sel = d_green_sel;
     assign d_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
+    assign d_wf_instruction = instruction_decode_register_q;
+    assign d_rf_we = wf_rf_we;
 
     
     // ------------------- EX CONTROL LOGIC
