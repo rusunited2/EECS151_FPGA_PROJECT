@@ -72,6 +72,10 @@ module asm_tb();
     wait_for_reg_to_equal(20, 32'd2);       // Run the simulation until the flag is set to 2
     check_reg(1, 32'd500, 2);               // Verify that x1 contains 500
     check_reg(2, 32'd100, 3);               // Verify that x2 contains 100
+
+    // Test AND
+    wait_for_reg_to_equal(20, 32'd3);
+    check_reg(2, 32'd8, 4);
     $display("ALL ASSEMBLY TESTS PASSED!");
     $finish();
   end
