@@ -638,7 +638,6 @@ module cpu #(
     wire d_pc_thirty, d_nop_sel, d_orange_sel, d_green_sel;
     wire d_jalr;
     wire d_br_taken;
-    wire d_rf_we;
     D_CU d_cu (
         .instruction(d_instruction), 
         .pc(d_pc), 
@@ -648,8 +647,7 @@ module cpu #(
         .green_sel(d_green_sel),
         .jalr(d_jalr),
         .br_taken(d_br_taken),
-        .wf_instruction(d_wf_instruction),
-        .rf_we(d_rf_we)
+        .wf_instruction(d_wf_instruction)
     );
 
     assign d_instruction = nop_mux_out;
@@ -659,9 +657,7 @@ module cpu #(
     assign rs1_mux_sel = d_orange_sel;
     assign rs2_mux_sel = d_green_sel;
     assign d_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
-    assign d_wf_instruction = instruction_decode_register_q;
-    assign d_rf_we = wf_rf_we;
-
+    assign d_wf_instruction = instruction_execute_register_q;
     
     // ------------------- EX CONTROL LOGIC
     wire [31:0] x_instruction, wf_instruction;
