@@ -700,10 +700,14 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 					green_sel = 0;
 				end
       end
-      `OPC_ARI_ITYPE_5: begin
+      `OPC_ARI_ITYPE_5: begin // If WF is i and X is r-type
         if (wf_instruction[11:7] == instruction[19:15]) begin // WF_rd == X_rs1
 					orange_sel = 1;
 					green_sel = 0;
+				end
+        else if(wf_instruction[11:7] == instruction[24:20]) begin // WF_rd == X_rs2
+					orange_sel = 0;
+          green_sel = 1;
 				end
 				else begin
 					orange_sel = 0;
