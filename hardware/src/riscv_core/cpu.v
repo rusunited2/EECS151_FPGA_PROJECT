@@ -13,7 +13,8 @@ module cpu #(
     // Synchronous write: write takes one cycle
     wire [11:0] bios_addra, bios_addrb;
     wire [31:0] bios_douta, bios_doutb;
-    wire bios_ena, bios_enb;
+    reg bios_ena;
+    reg bios_enb;
     bios_mem bios_mem (
       .clk(clk),
       .ena(bios_ena),
@@ -32,7 +33,7 @@ module cpu #(
     reg [31:0] dmem_din;
 	wire [31:0] dmem_dout;
     reg [3:0] dmem_we;
-    wire dmem_en;
+    reg dmem_en;
     dmem dmem (
       .clk(clk),
       .en(dmem_en),
@@ -48,8 +49,8 @@ module cpu #(
     // Write-byte-enable: select which of the four bytes to write
     wire [31:0] imem_dina, imem_doutb;
     wire [13:0] imem_addra, imem_addrb;
-    wire [3:0] imem_wea;
-    wire imem_ena;
+    reg [3:0] imem_wea;
+    reg imem_ena;
     imem imem (
       .clk(clk),
       .ena(imem_ena),
@@ -153,7 +154,11 @@ module cpu #(
     assign bios_addra = pc_mux_out[15:2];
     assign imem_addrb = pc_mux_out[15:2];
 
-    assign bios_ena = 1; // FIX THIS
+    // assign bios_ena = 1; // FIX THIS
+    always @(*) begin
+        if (pc_mux_out[31:28] == 4'b0100) bios_ena = 1;
+        else bios_ena = 0;
+    end
 	// 2. D -------------------------------------------------------
 	wire pc_thirty_mux_sel;
   	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
@@ -482,8 +487,8 @@ module cpu #(
 
     // inputs to A-MUX
     assign a_mux_in0 = rs1_mux2_out;
-    assign a_mux_in1 = pc_decode_register_q; // temp
-    assign a_mux_in2 = 0; // temp
+    assign a_mux_in1 = pc_decode_register_q;
+    assign a_mux_in2 = ldx_out; // temp
 
     // inputs to B-MUX
     assign b_mux_in0 = rs2_mux2_out;
@@ -502,14 +507,20 @@ module cpu #(
 
     // inputs to RS2_MUX3
     assign rs2_mux3_in0 = rs2_mux2_out;
-    assign rs2_mux3_in1 = 0; // temp
-    assign rs2_mux3_in2 = 0; // temp
+    assign rs2_mux3_in1 = alu_register_q; // temp
+    assign rs2_mux3_in2 = ldx_out; // temp
 
     // send ALU result back to PC_SEL MUX
-    assign pc_mux_in3 = alu_register_q;
+    // assign pc_mux_in3 = alu_register_q;
+    assign pc_mux_in3 = alu_out;
 
 	// Input to ldx for lw, lh and lb
 	assign ldx_alu_out = alu_register_q;
+
+
+    // FORWARD DATA D TO RS1_MUX and RS2_MUX
+    assign rs1_mux_in1 = wb_mux_out;
+    assign rs2_mux_in1 = wb_mux_out;
 
     // --------------------------------------------MEMORY ASSIGNS
 
@@ -523,19 +534,45 @@ module cpu #(
 	end
 
     //assign dmem_din = rs2_mux3_out;
+    always @(*) begin
+        case(instruction_decode_register_q[6:2])
+            `OPC_LOAD_5: begin
+                if (alu_out[31:28] == 4'b0001 || alu_out[31:28] == 4'b0011) dmem_en = 1;
+                else dmem_en = 0;
+            end
+            `OPC_STORE_5: begin
+                if (alu_out[31:28] == 4'b0001 || alu_out[31:28] == 4'b0011) dmem_en = 1;
+                else dmem_en = 0;
+            end
+            default: begin
+                dmem_en = 0;
+            end
+        endcase
+    end
 
-    assign dmem_en = 1; // temp 0 for when you write
     // output of dmem = dmem_dout
 
     // input to BIOS
     assign bios_addrb = alu_out[13:2];
-    assign bios_enb = 0; // temp
+    // assign bios_enb = 0; // temp
+    always @(*) begin
+        if (instruction_decode_register_q[6:2] == `OPC_LOAD_5 && alu_out[31:28] == 4'b0100) bios_enb = 1;
+        else bios_enb = 0;
+    end
 
     // input to IMEM
-    assign imem_addra = alu_out[15:2];
-    assign imem_dina = rs2_mux3_out;
-    assign imem_wea = 4'b1111; // temp
-    assign imem_ena = 0; // temp
+    assign imem_addra = alu_out[15:2]; // correct
+    assign imem_dina = rs2_mux3_out; // correct
+    // assign imem_wea = 4'b1111; // temp
+
+    always @(*) begin
+        if (instruction_decode_register_q[6:2] == `OPC_STORE_5 && (alu_out[31:28] == 4'b0010 || alu_out[31:28] == 4'b0011) && pc_decode_register_q[30] == 1'b1) begin
+            imem_ena = 1;
+        end
+        else begin 
+            imem_ena = 0;
+        end
+    end
 
     // input to UART
     assign uart_instruction = instruction_decode_register_q;
@@ -571,6 +608,8 @@ module cpu #(
     wire [1:0] wf_wb_sel;
     wire [2:0] wf_ldx_sel, wf_pc_sel;
 	wire wf_br_taken;
+    wire wf_jal;
+    wire wf_jalr;
     WF_CU wf_cu (
         .rst(rst),
         .instruction(wf_instruction), 
@@ -578,7 +617,9 @@ module cpu #(
         .wb_sel(wf_wb_sel), 
         .ldx_sel(wf_ldx_sel), 
         .pc_sel(wf_pc_sel),
-		.br_taken(wf_br_taken)
+		.br_taken(wf_br_taken),
+        .jal(wf_jal),
+        .jalr(wf_jalr)
     );
 
     assign wf_instruction = instruction_execute_register_q; // check this if reset we need to change control logic
@@ -586,20 +627,27 @@ module cpu #(
     assign wb_mux_sel = wf_wb_sel;
     assign ldx_sel = wf_ldx_sel;
     assign pc_mux_sel = wf_pc_sel;
-
+    assign wf_jal = (nop_mux_out[6:2] == `OPC_JAL_5) ? 1 : 0;
+    assign wf_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
 
 
     // ------------------ D CONTROL LOGIC
     wire [31:0] d_instruction;
     wire [31:0] d_pc;
+    wire [31:0] d_wf_instruction;
     wire d_pc_thirty, d_nop_sel, d_orange_sel, d_green_sel;
+    wire d_jalr;
+    wire d_br_taken;
     D_CU d_cu (
         .instruction(d_instruction), 
         .pc(d_pc), 
         .pc_thirty(d_pc_thirty), 
         .nop_sel(d_nop_sel), 
         .orange_sel(d_orange_sel), 
-        .green_sel(d_green_sel)
+        .green_sel(d_green_sel),
+        .jalr(d_jalr),
+        .br_taken(d_br_taken),
+        .wf_instruction(d_wf_instruction)
     );
 
     assign d_instruction = nop_mux_out;
@@ -608,7 +656,8 @@ module cpu #(
     assign nop_mux_sel = d_nop_sel;
     assign rs1_mux_sel = d_orange_sel;
     assign rs2_mux_sel = d_green_sel;
-
+    assign d_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
+    assign d_wf_instruction = instruction_execute_register_q;
     
     // ------------------- EX CONTROL LOGIC
     wire [31:0] x_instruction, wf_instruction;
@@ -648,6 +697,8 @@ module cpu #(
 	assign wf_br_taken = x_br_taken;
 	assign wf_instruction = instruction_execute_register_q;
 
+    assign d_br_taken = x_br_taken;
+
 	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
 	always @(*) begin
 		if (x_instruction[6:0] == 7'b0100011) begin
@@ -671,6 +722,33 @@ module cpu #(
 			else if (alu_out[1:0] == 3) begin
 				if(x_instruction[14:12] == 3'b000)
     				dmem_we = 4'b1000; // temp what are these values
+			end
+		end
+	end
+
+    // IMEM WEA
+    always @(*) begin
+		if (x_instruction[6:2] == `OPC_STORE_5) begin
+			if (alu_out[1:0] == 0) begin
+				case(x_instruction[14:12])
+    				3'b000: imem_wea = 4'b0001; // temp what are these values
+					3'b001: imem_wea = 4'b0011;
+					3'b010: imem_wea = 4'b1111;
+				endcase
+			end
+			else if (alu_out[1:0] == 1) begin
+				if(x_instruction[14:12] == 3'b000)
+    				imem_wea = 4'b0010; // temp what are these values
+			end
+			else if (alu_out[1:0] == 2) begin
+				case(x_instruction[14:12])
+    				3'b000: imem_wea = 4'b0100; // temp what are these values
+					3'b001: imem_wea = 4'b1100;
+				endcase
+			end
+			else if (alu_out[1:0] == 3) begin
+				if(x_instruction[14:12] == 3'b000)
+    				imem_wea = 4'b1000; // temp what are these values
 			end
 		end
 	end
