@@ -18,8 +18,11 @@ module reg_file (
 
 	always @(posedge clk) begin
 	// if writing to x0 just write 0 to it regardless of the value
-        if (we)
-            mem[wa] <= wd;
+        if (we) begin
+			if (wa != 0)
+            	mem[wa] <= wd;
+			mem[0] <= 0;
+		end
     end
 
     always @(*) begin
