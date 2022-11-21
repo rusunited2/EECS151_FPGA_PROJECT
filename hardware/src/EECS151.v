@@ -554,7 +554,7 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel, br_taken, jal, ja
 
   always @(*) begin
     if (rst) pc_sel = 0;
-    else if (instruction[6:2] == `OPC_BRANCH_5 || instruction[6:2] == `OPC_JALR_5) pc_sel = 4;
+    // else if (instruction[6:2] == `OPC_BRANCH_5 || instruction[6:2] == `OPC_JALR_5) pc_sel = 4;
     else if (jal) pc_sel = 1;
     else if (jalr) pc_sel = 3;
     else if (br_taken) pc_sel = 3;
@@ -651,22 +651,26 @@ module D_CU(instruction, pc, pc_thirty, nop_sel, orange_sel, green_sel, jalr, br
       green_sel = 0;
     end
     else begin
-        if (wf_instruction[11:7] == instruction[19:15] && wf_instruction[11:7] == instruction[24:20]) begin
-          orange_sel = 1;
-          green_sel = 1;
-        end
-        else if (wf_instruction[11:7] == instruction[19:15]) begin
-          orange_sel = 1;
-          green_sel = 0;
-        end
-        else if (wf_instruction[11:7] == instruction[24:20]) begin
-          orange_sel = 0;
-          green_sel = 1;
-        end
-        else begin
-          orange_sel = 0;
-          green_sel = 0;
-        end
+      if (wf_instruction[11:7] == 5'b0) begin
+        orange_sel = 0;
+        green_sel = 0;
+      end 
+      else if (wf_instruction[11:7] == instruction[19:15] && wf_instruction[11:7] == instruction[24:20]) begin
+        orange_sel = 1;
+        green_sel = 1;
+      end
+      else if (wf_instruction[11:7] == instruction[19:15]) begin
+        orange_sel = 1;
+        green_sel = 0;
+      end
+      else if (wf_instruction[11:7] == instruction[24:20]) begin
+        orange_sel = 0;
+        green_sel = 1;
+      end
+      else begin
+        orange_sel = 0;
+        green_sel = 0;
+      end
     end
   end
 endmodule // D_CU
@@ -675,8 +679,8 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 	input [31:0] instruction, wf_instruction;
   input br_eq, br_lt;
 
-	output reg br_un, b_sel, csr_sel;
-	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel;
+	output reg br_un, b_sel;
+	output reg [1:0] orange_sel, green_sel, a_sel, rs2_sel, csr_sel;
 	output reg [3:0] alu_sel;
   output reg br_taken; // add br_taken logic
 
@@ -687,7 +691,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 
   // ALU to ALU and MEM to ALU
   always @(*) begin
-    if (wf_instruction[6:2] == `OPC_BRANCH_5 || wf_instruction[6:2] == `OPC_STORE_5) begin // check if store necessary
+    if (wf_instruction[6:2] == `OPC_BRANCH_5 || wf_instruction[6:2] == `OPC_STORE_5 || wf_rd == 5'b0) begin // check if store necessary
       orange_sel = 0;
       green_sel = 0;
     end
@@ -733,10 +737,10 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
   always @(*) begin
     case (instruction[6:2])
       `OPC_STORE_5: begin
-        if (wf_instruction[6:2] == `OPC_LOAD_5 && wf_rd == x_rs2) begin
+        if (wf_instruction[6:2] == `OPC_LOAD_5 && wf_rd == x_rs2 && wf_rd != 5'b0) begin
           rs2_sel = 2'd2; // MEM to MEM
         end
-        else if (wf_rd == x_rs2 && wf_instruction[6:2] != `OPC_STORE_5 && wf_instruction[6:2] != `OPC_BRANCH_5) begin
+        else if (wf_rd != 5'b0 && wf_rd == x_rs2 && wf_instruction[6:2] != `OPC_STORE_5 && wf_instruction[6:2] != `OPC_BRANCH_5) begin
           rs2_sel = 2'd1; // ALU to MEM
         end
         else begin
@@ -757,7 +761,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
     else begin
       case(wf_instruction[6:2])
         `OPC_LOAD_5: begin
-          if (instruction[6:2] == `OPC_STORE_5 && wf_instruction[11:7] == instruction[19:15]) begin
+          if (instruction[6:2] == `OPC_STORE_5 && wf_rd == instruction[19:15] && wf_rd != 5'b0) begin
             a_sel = 2'd2; // MEM to MEM
           end
           else begin
@@ -775,9 +779,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 		case(instruction[6:2])
 			`OPC_ARI_RTYPE_5: begin // If R-type AKA type = 0
 				br_un = 0;
-				a_sel = 0; // forwarding
 				b_sel = 0;
-				// rs2_sel = 0;
 				case(instruction[14:12])
           `FNC_ADD_SUB: begin // add 
             if (instruction[30] == `FNC2_SUB) alu_sel = 4'b0001;
@@ -801,9 +803,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 			end
 			`OPC_ARI_ITYPE_5: begin // If I-type (I and I*)
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 1;
-				// rs2_sel = 0;
 				case(instruction[14:12])
           `FNC_ADD_SUB: alu_sel = 4'b0000; // addi
           `FNC_AND: alu_sel = 4'b0010; // andi
@@ -821,84 +821,64 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 			end
       `OPC_LOAD_5: begin // load (I type)
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 1;
-				// rs2_sel = 0;
         alu_sel = 4'b0000;
         csr_sel = 0;
       end
       `OPC_STORE_5: begin // S type
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
       end
 			`OPC_BRANCH_5: begin // B-type
         if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) br_un = 1;
         else br_un = 0;
-				a_sel = 1;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
 			end
       `OPC_JAL_5: begin // J type (jal)
 				br_un = 0;
-				a_sel = 1;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
       end
       `OPC_JALR_5: begin // JALR (I type)
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
       end
       `OPC_AUIPC_5: begin // AUIPC
 				br_un = 0;
-				a_sel = 1;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
       end
       `OPC_LUI_5: begin // LUI
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 1;
-				// rs2_sel = 0;
 				alu_sel = 4'b1010;
 				csr_sel = 0;
       end
 	    5'b11100: begin // CSRR
 	  	  if (instruction[14:12] == 3'b001) begin // CSRRW
 					br_un = 0;
-					a_sel = 0;
 					b_sel = 1;
-					// rs2_sel = 0;
+					alu_sel = 0;
+					csr_sel = 2;
+				end
+				else begin // CSRRWI
+					br_un = 0;
+					b_sel = 1;
 					alu_sel = 0;
 					csr_sel = 1;
-				end
-				else if (instruction[14:12] == 3'b101) begin // CSRRWI
-					br_un = 0;
-					a_sel = 0;
-					b_sel = 1;
-					// rs2_sel = 0;
-					alu_sel = 0;
-					csr_sel = 0;
 				end
 	  end
 			default: begin
 				br_un = 0;
-				a_sel = 0;
 				b_sel = 0;
-				// rs2_sel = 0;
 				alu_sel = 0;
 				csr_sel = 0;
 			end

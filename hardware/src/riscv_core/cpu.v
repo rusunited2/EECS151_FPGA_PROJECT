@@ -364,15 +364,23 @@ module cpu #(
     );
 
     // CSR
-    wire csr_mux_sel;
-    wire [31:0] csr_mux_in0, csr_mux_in1;
+    wire [1:0] csr_mux_sel;
+    wire [31:0] csr_mux_in0, csr_mux_in1, csr_mux_in2;
     wire [31:0] csr_mux_out;
-    TWO_INPUT_MUX csr_mux (
-        .sel(csr_mux_sel),
-        .in0(csr_mux_in0),
-        .in1(csr_mux_in1),
-        .out(csr_mux_out)
-    );
+    // TWO_INPUT_MUX csr_mux (
+    //     .sel(csr_mux_sel),
+    //     .in0(csr_mux_in0),
+    //     .in1(csr_mux_in1),
+    //     .out(csr_mux_out)
+    // );
+    FOUR_INPUT_MUX csr_mux (
+		.sel(csr_mux_sel),
+		.in0(csr_mux_in0),
+		.in1(csr_mux_in1),
+		.in2(csr_mux_in2),
+		.in3(0),
+		.out(csr_mux_out)
+	);
 
     wire [31:0] csr_in;
     always @(posedge clk) begin
@@ -500,8 +508,9 @@ module cpu #(
     assign alu_rs2 = b_mux_out;
 
     // inputs to CSR_MUX
-    assign csr_mux_in0 = imm_gen_out;
-    assign csr_mux_in1 = rs1_mux2_out;
+    assign csr_mux_in0 = csr_in;
+    assign csr_mux_in1 = imm_gen_out;
+    assign csr_mux_in2 = rs1_mux2_out;
 
     // input to CSR register
     assign csr_in = csr_mux_out;
@@ -663,8 +672,8 @@ module cpu #(
     // ------------------- EX CONTROL LOGIC
     wire [31:0] x_instruction, x_wf_instruction;
     wire x_br_eq, x_br_lt;
-    wire x_br_un, x_b_sel, x_csr_sel;
-    wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel;
+    wire x_br_un, x_b_sel;
+    wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel, x_csr_sel;
     wire [3:0] x_alu_sel;
 	wire x_br_taken;
     X_CU x_cu (
