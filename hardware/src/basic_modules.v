@@ -80,6 +80,7 @@ module ALU(alu_sel, rs1, rs2, out);
 	  4'b0111: out = $signed(rs1) >>> rs2[4:0]; // sra
 	  4'b1000: out = ($signed(rs1) < $signed(rs2)) ? 1 : 0; // slt
 	  4'b1001: out = (rs1 < rs2) ? 1 : 0; // sltu
+	  4'b1010: out = rs2;
 	  default: out = 0; // For error/default case
 	endcase
   end
