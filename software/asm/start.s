@@ -27,4 +27,10 @@ li x20, 2           # Set the flag register
 
 # TODO: add more tests here
 
+# TEST and
+li x3, 25
+li x4, 12
+and x2, x3, x4
+li x20, 3
+
 done: j done
