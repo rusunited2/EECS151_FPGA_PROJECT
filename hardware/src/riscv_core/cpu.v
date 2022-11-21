@@ -711,29 +711,31 @@ module cpu #(
 
 	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
 	always @(*) begin
-		if (x_instruction[6:0] == 7'b0100011) begin
+		if (x_instruction[6:2] == `OPC_STORE_5) begin
 			if (alu_out[1:0] == 0) begin
 				case(x_instruction[14:12])
     				3'b000: dmem_we = 4'b0001; // temp what are these values
 					3'b001: dmem_we = 4'b0011;
 					3'b010: dmem_we = 4'b1111;
+                    default: dmem_we = 4'b0000;
 				endcase
 			end
-			else if (alu_out[1:0] == 1) begin
-				if(x_instruction[14:12] == 3'b000)
-    				dmem_we = 4'b0010; // temp what are these values
+			else if (alu_out[1:0] == 1 && x_instruction[14:12] == 3'b000) begin
+				dmem_we = 4'b0010;
 			end
 			else if (alu_out[1:0] == 2) begin
 				case(x_instruction[14:12])
     				3'b000: dmem_we = 4'b0100; // temp what are these values
 					3'b001: dmem_we = 4'b1100;
+                    default: dmem_we = 4'b0000;
 				endcase
 			end
-			else if (alu_out[1:0] == 3) begin
-				if(x_instruction[14:12] == 3'b000)
-    				dmem_we = 4'b1000; // temp what are these values
+			else if (alu_out[1:0] == 3 && x_instruction[14:12] == 3'b000) begin
+				dmem_we = 4'b1000;
 			end
+            else dmem_we = 4'b0000;
 		end
+        else dmem_we = 4'b0000;
 	end
 
     // IMEM WEA
@@ -744,22 +746,24 @@ module cpu #(
     				3'b000: imem_wea = 4'b0001; // temp what are these values
 					3'b001: imem_wea = 4'b0011;
 					3'b010: imem_wea = 4'b1111;
+                    default: imem_wea = 4'b0000;
 				endcase
 			end
-			else if (alu_out[1:0] == 1) begin
-				if(x_instruction[14:12] == 3'b000)
-    				imem_wea = 4'b0010; // temp what are these values
+			else if (alu_out[1:0] == 1 && x_instruction[14:12] == 3'b000) begin
+				imem_wea = 4'b0010;
 			end
 			else if (alu_out[1:0] == 2) begin
 				case(x_instruction[14:12])
     				3'b000: imem_wea = 4'b0100; // temp what are these values
 					3'b001: imem_wea = 4'b1100;
+                    default: imem_wea = 4'b0000;
 				endcase
 			end
-			else if (alu_out[1:0] == 3) begin
-				if(x_instruction[14:12] == 3'b000)
-    				imem_wea = 4'b1000; // temp what are these values
+			else if (alu_out[1:0] == 3 && x_instruction[14:12] == 3'b000) begin
+				imem_wea = 4'b1000; // temp what are these values
 			end
+            else imem_wea = 4'b0000;
 		end
+        else imem_wea = 4'b0000;
 	end
 endmodule

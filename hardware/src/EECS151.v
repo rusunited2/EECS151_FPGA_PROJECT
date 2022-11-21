@@ -574,7 +574,6 @@ module WF_CU(rst, instruction, rf_we, wb_sel, ldx_sel, pc_sel, br_taken, jal, ja
         rf_we = 1;
       end
       `OPC_LOAD_5: begin // I type for load
-				ldx_sel = 0;
 				wb_sel = 0;
         rf_we = 1;
         case(instruction[14:12])
