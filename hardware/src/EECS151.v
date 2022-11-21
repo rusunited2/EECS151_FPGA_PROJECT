@@ -873,7 +873,7 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
 				a_sel = 0;
 				b_sel = 1;
 				// rs2_sel = 0;
-				alu_sel = 0;
+				alu_sel = 4'b1010;
 				csr_sel = 0;
       end
 	    5'b11100: begin // CSRR
