@@ -661,7 +661,7 @@ module cpu #(
     assign d_wf_instruction = instruction_execute_register_q;
     
     // ------------------- EX CONTROL LOGIC
-    wire [31:0] x_instruction, wf_instruction;
+    wire [31:0] x_instruction, x_wf_instruction;
     wire x_br_eq, x_br_lt;
     wire x_br_un, x_b_sel, x_csr_sel;
     wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel;
@@ -680,7 +680,7 @@ module cpu #(
         .alu_sel(x_alu_sel), 
         .csr_sel(x_csr_sel),
 		.br_taken(x_br_taken),
-		.wf_instruction(wf_instruction)
+		.wf_instruction(x_wf_instruction)
     );
 
     // EX Control Logic wires
@@ -696,7 +696,7 @@ module cpu #(
     assign alu_sel = x_alu_sel;
     assign csr_mux_sel = x_csr_sel;
 	assign wf_br_taken = x_br_taken;
-	assign wf_instruction = instruction_execute_register_q;
+	assign x_wf_instruction = instruction_execute_register_q;
 
     assign d_br_taken = x_br_taken;
 

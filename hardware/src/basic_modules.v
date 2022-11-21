@@ -165,4 +165,4 @@ module LDX(ldx_in, ldx_sel, ldx_out, alu_out);
 			endcase
 		end
 	end
-endmodule;
+endmodule
