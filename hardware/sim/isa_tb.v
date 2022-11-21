@@ -31,6 +31,7 @@ module isa_tb();
     else
       cycle <= cycle + 1;
   end
+	integer idx;
 
   string hex_file;
   string test_name;
@@ -50,6 +51,7 @@ module isa_tb();
 
     $dumpfile({test_name, ".fst"});
     $dumpvars(0, isa_tb);
+    for (idx = 0; idx < 32; idx = idx + 1) $dumpvars(0, cpu.rf.mem[idx]);
 
     rst = 0;
 
