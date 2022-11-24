@@ -367,12 +367,6 @@ module cpu #(
     wire [1:0] csr_mux_sel;
     wire [31:0] csr_mux_in0, csr_mux_in1, csr_mux_in2;
     wire [31:0] csr_mux_out;
-    // TWO_INPUT_MUX csr_mux (
-    //     .sel(csr_mux_sel),
-    //     .in0(csr_mux_in0),
-    //     .in1(csr_mux_in1),
-    //     .out(csr_mux_out)
-    // );
     FOUR_INPUT_MUX csr_mux (
 		.sel(csr_mux_sel),
 		.in0(csr_mux_in0),
@@ -399,21 +393,6 @@ module cpu #(
 		.in3(0),
 		.out(rs2_mux3_out)
 	);
-
-    // UART
-    // wire [31:0] uart_instruction, uart_addr;
-    // wire [7:0] uart_tx_data_in;
-    // wire [31:0] uart_out;
-    // IO_MEMORY_MAP uart (
-    //     .clk(clk),
-    //     .rst(rst),
-    //     .serial_in(serial_in),
-    //     .serial_out(serial_out),
-    //     .instruction(uart_instruction),
-    //     .addr(uart_addr),
-    //     .uart_tx_data_in(uart_tx_data_in),
-    //     .out(uart_out)
-    // );
     
     reg [1:0] addr_mux_sel;
   	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
@@ -564,7 +543,6 @@ module cpu #(
 
     // input to BIOS
     assign bios_addrb = alu_out[13:2];
-    // assign bios_enb = 0; // temp
     always @(*) begin
         if (instruction_decode_register_q[6:2] == `OPC_LOAD_5 && alu_out[31:28] == 4'b0100) bios_enb = 1;
         else bios_enb = 0;
@@ -573,7 +551,6 @@ module cpu #(
     // input to IMEM
     assign imem_addra = alu_out[15:2]; // correct
     assign imem_dina = rs2_mux3_out; // correct
-    // assign imem_wea = 4'b1111; // temp
 
     always @(*) begin
         if (instruction_decode_register_q[6:2] == `OPC_STORE_5 && (alu_out[31:28] == 4'b0010 || alu_out[31:28] == 4'b0011) && pc_decode_register_q[30] == 1'b1) begin
