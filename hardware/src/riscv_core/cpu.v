@@ -78,31 +78,31 @@ module cpu #(
     );
 
     // On-chip UART
-    //// UART Receiver
-    // wire [7:0] uart_rx_data_out;
-    // wire uart_rx_data_out_valid;
-    // wire uart_rx_data_out_ready;
-    // //// UART Transmitter
-    // wire [7:0] uart_tx_data_in;
-    // wire uart_tx_data_in_valid;
-    // wire uart_tx_data_in_ready;
-    // uart #(
-    //     .CLOCK_FREQ(CPU_CLOCK_FREQ),
-    //     .BAUD_RATE(BAUD_RATE)
-    // ) on_chip_uart (
-    //     .clk(clk),
-    //     .reset(rst),
+    // UART Receiver
+    wire [7:0] uart_rx_data_out;
+    wire uart_rx_data_out_valid;
+    reg uart_rx_data_out_ready; // done
+    // UART Transmitter
+    wire [7:0] uart_tx_data_in;
+    reg uart_tx_data_in_valid; // done
+    wire uart_tx_data_in_ready;
+    uart #(
+        .CLOCK_FREQ(CPU_CLOCK_FREQ),
+        .BAUD_RATE(BAUD_RATE)
+    ) on_chip_uart (
+        .clk(clk), // input/done
+        .reset(rst), // input/done
 
-    //     .serial_in(serial_in),
-    //     .data_out(uart_rx_data_out),
-    //     .data_out_valid(uart_rx_data_out_valid),
-    //     .data_out_ready(uart_rx_data_out_ready),
+        .serial_in(serial_in), // input/done
+        .data_out(uart_rx_data_out), // output
+        .data_out_valid(uart_rx_data_out_valid), // output
+        .data_out_ready(uart_rx_data_out_ready), // input/done
 
-    //     .serial_out(serial_out),
-    //     .data_in(uart_tx_data_in),
-    //     .data_in_valid(uart_tx_data_in_valid),
-    //     .data_in_ready(uart_tx_data_in_ready)
-    // );
+        .serial_out(serial_out), // output/done
+        .data_in(uart_tx_data_in), // input
+        .data_in_valid(uart_tx_data_in_valid), // input
+        .data_in_ready(uart_tx_data_in_ready) // output
+    );
 
     reg [31:0] tohost_csr = 0;
 
@@ -401,19 +401,19 @@ module cpu #(
 	);
 
     // UART
-    wire [31:0] uart_instruction, uart_addr;
-    wire [7:0] uart_tx_data_in;
-    wire [31:0] uart_out;
-    IO_MEMORY_MAP uart (
-        .clk(clk),
-        .rst(rst),
-        .serial_in(serial_in),
-        .serial_out(serial_out),
-        .instruction(uart_instruction),
-        .addr(uart_addr),
-        .uart_tx_data_in(uart_tx_data_in),
-        .out(uart_out)
-    );
+    // wire [31:0] uart_instruction, uart_addr;
+    // wire [7:0] uart_tx_data_in;
+    // wire [31:0] uart_out;
+    // IO_MEMORY_MAP uart (
+    //     .clk(clk),
+    //     .rst(rst),
+    //     .serial_in(serial_in),
+    //     .serial_out(serial_out),
+    //     .instruction(uart_instruction),
+    //     .addr(uart_addr),
+    //     .uart_tx_data_in(uart_tx_data_in),
+    //     .out(uart_out)
+    // );
     
     reg [1:0] addr_mux_sel;
   	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
@@ -429,7 +429,7 @@ module cpu #(
 
     // For addr_mux_sel (output of memories)
     always @(*) begin
-        case(alu_out[31:28])
+        case(alu_register_q[31:28])
             4'b0001: addr_mux_sel = 2'b01;
             4'b0011: addr_mux_sel = 2'b01;
             4'b0100: addr_mux_sel = 2'b00;
@@ -585,9 +585,56 @@ module cpu #(
     end
 
     // input to UART
-    assign uart_instruction = instruction_decode_register_q;
-    assign uart_addr = alu_out;
+    wire [31:0] uart_lw_instruction,uart_sw_instruction, uart_lw_addr, uart_sw_addr;
+    reg [31:0] uart_out;
+
+    assign uart_sw_instruction = instruction_decode_register_q;
+    assign uart_lw_instruction = instruction_execute_register_q;
+    assign uart_sw_addr = alu_out;
+    assign uart_lw_addr = alu_register_q;
     assign uart_tx_data_in = rs2_mux3_out[7:0];
+
+    always @(*) begin
+        if (uart_lw_instruction[6:2] == `OPC_LOAD_5 && uart_lw_addr == 32'h80000004) begin
+            uart_rx_data_out_ready = 1;
+            uart_tx_data_in_valid = 0;
+        end
+        else if (uart_sw_instruction[6:2] == `OPC_STORE_5 && uart_sw_addr == 32'h80000008) begin
+            uart_rx_data_out_ready = 0;
+            uart_tx_data_in_valid = 1;
+        end
+        else begin
+            uart_rx_data_out_ready = 0;
+            uart_tx_data_in_valid = 0;
+        end
+    end
+
+    // Cycle Counter
+    reg [31:0] cycle_counter = 0;
+    always @(posedge clk) begin
+        if (uart_sw_addr == 32'h80000018) cycle_counter <= 0;
+        else cycle_counter <= cycle_counter + 1;
+    end
+
+    // Instruction Counter
+    reg [31:0] instruction_counter = 0;
+    always @(posedge clk) begin
+        if (uart_sw_addr == 32'h80000018) instruction_counter <= 0;
+        else if (uart_sw_instruction == 32'b0000_0000_0000_0000_0000_0000_0001_0011) instruction_counter <= instruction_counter;
+        else instruction_counter <= instruction_counter + 1;
+    end
+
+    always @(*) begin
+        case(uart_lw_addr)
+            32'h80000000: uart_out = {30'b0, uart_rx_data_out_valid, uart_tx_data_in_ready};
+            32'h80000004: uart_out = {24'b0, uart_rx_data_out};
+            32'h80000010: uart_out = cycle_counter;
+            32'h80000014: uart_out = instruction_counter;
+            default: begin
+                uart_out = 32'h00000000;
+            end
+        endcase
+    end
 
     // addr MUX input
     assign addr_mux_in0 = bios_doutb;
