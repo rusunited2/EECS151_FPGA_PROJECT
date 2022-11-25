@@ -55,7 +55,7 @@ module IO_MEMORY_MAP #(
     // Instruction Counter
     reg [31:0] instruction_counter = 0;
     always @(posedge clk) begin
-        if (addr == 32'h80000018) cycle_counter <= 0;
+        if (addr == 32'h80000018) instruction_counter <= 0;
         else if (instruction == 32'b0000_0000_0000_0000_0000_0000_0001_0011) instruction_counter <= instruction_counter;
         else instruction_counter <= instruction_counter + 1;
     end
