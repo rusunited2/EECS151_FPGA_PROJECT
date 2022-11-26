@@ -7,13 +7,31 @@ module sat_updn #(
     parameter WIDTH=2
 ) (
     input [WIDTH-1:0] in,
-    input up,
-    input dn,
+    input up, // Taken
+    input dn, // Not-taken
 
-    output [WIDTH-1:0] out
+    output reg [WIDTH-1:0] out
 );
-
-    // TODO: Your code
-    assign out = '0;
-
+	// MSB is our prediction
+	always @(*) begin
+		if (up) begin
+			case (in)
+				2'b00: out = 2'b11;
+				2'b01: out = 2'b00;
+				2'b10: out = 2'b11;
+				2'b11: out = 2'b11;
+			endcase
+		end
+		else if (dn) begin
+			case (in)
+				2'b00: out = 2'b01;
+				2'b01: out = 2'b01;
+				2'b10: out = 2'b01;
+				2'b11: out = 2'b10;
+			endcase
+		end
+		else begin
+			out = in;
+		end
+	end
 endmodule
