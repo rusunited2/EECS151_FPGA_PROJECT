@@ -15,20 +15,10 @@ module sat_updn #(
 	// MSB is our prediction
 	always @(*) begin
 		if (up) begin
-			case (in)
-				2'b00: out = 2'b11;
-				2'b01: out = 2'b00;
-				2'b10: out = 2'b11;
-				2'b11: out = 2'b11;
-			endcase
+			out = (in < ((2 ** WIDTH) - 1)) ? (in + 1) : in;
 		end
 		else if (dn) begin
-			case (in)
-				2'b00: out = 2'b01;
-				2'b01: out = 2'b01;
-				2'b10: out = 2'b01;
-				2'b11: out = 2'b10;
-			endcase
+			out = (in > 0) ? (in - 1) : in;
 		end
 		else begin
 			out = in;
