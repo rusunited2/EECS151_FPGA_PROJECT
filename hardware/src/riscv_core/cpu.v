@@ -430,12 +430,13 @@ module cpu #(
 
     // ALU
     wire [3:0] alu_sel;
-    wire [31:0] alu_rs1, alu_rs2;
+    wire [31:0] alu_rs1, alu_rs2, alu_pc;
     wire [31:0] alu_out;
     ALU alu (
         .alu_sel(alu_sel), 
         .rs1(alu_rs1), 
         .rs2(alu_rs2), 
+        .pc(alu_pc),
         .out(alu_out)
     );
 
@@ -452,15 +453,15 @@ module cpu #(
 		.out(csr_mux_out)
 	);
 
-    wire br_result_mux_sel;
-    wire [31:0] br_result_mux_in0, br_result_mux_in1;
-    wire [31:0] br_result_mux_out;
-    TWO_INPUT_MUX br_result_mux (
-		.sel(br_result_mux_sel),
-		.in0(br_result_mux_in0),
-		.in1(br_result_mux_in1),
-		.out(br_result_mux_out)
-	);
+    // wire br_result_mux_sel;
+    // wire [31:0] br_result_mux_in0, br_result_mux_in1;
+    // wire [31:0] br_result_mux_out;
+    // TWO_INPUT_MUX br_result_mux (
+	// 	.sel(br_result_mux_sel),
+	// 	.in0(br_result_mux_in0),
+	// 	.in1(br_result_mux_in1),
+	// 	.out(br_result_mux_out)
+	// );
 
     wire [31:0] csr_in;
     always @(posedge clk) begin
@@ -571,6 +572,7 @@ module cpu #(
     // inputs to ALU
     assign alu_rs1 = a_mux_out;
     assign alu_rs2 = b_mux_out;
+    assign alu_pc = pc_decode_register_q;
 
     // inputs to CSR_MUX
     assign csr_mux_in0 = csr_in;
@@ -601,9 +603,10 @@ module cpu #(
     assign is_br_check = instruction_decode_register_q[6:2] == `OPC_BRANCH_5;
 
     // BR Result Mux (output to PC_SEL = 3)
-    assign br_result_mux_in0 = alu_out;
-    assign br_result_mux_in1 = pc_decode_register_q + 4;
-    assign pc_mux_in3 = br_result_mux_out;
+    // assign br_result_mux_in0 = alu_out;
+    // assign br_result_mux_in1 = pc_decode_register_q + 4;
+    // assign pc_mux_in3 = br_result_mux_out;
+    assign pc_mux_in3 = alu_out;
 
     // --------------------------------------------MEMORY ASSIGNS
 
@@ -819,7 +822,7 @@ module cpu #(
     assign br_taken_check = x_br_taken;
 
     // Wiring for BR Result Mux
-    assign br_result_mux_sel = x_br_result;
+    // assign br_result_mux_sel = x_br_result;
 
     // Wiring for br_pred_correct to other modules
     assign wf_br_pred_correct = x_br_pred_correct;

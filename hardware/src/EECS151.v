@@ -843,7 +843,8 @@ module X_CU(instruction, orange_sel, green_sel, br_un, br_eq, br_lt, a_sel, b_se
         if (instruction[14:12] == 3'b111 || instruction[14:12] == 3'b110) br_un = 1;
         else br_un = 0;
 				b_sel = 1;
-				alu_sel = 0;
+        if (br_pred_taken && !br_taken) alu_sel = 4'b1011;
+				else alu_sel = 0;
 				csr_sel = 0;
 			end
       `OPC_JAL_5: begin // J type (jal)
