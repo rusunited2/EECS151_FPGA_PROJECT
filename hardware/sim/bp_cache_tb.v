@@ -45,47 +45,54 @@ module bp_cache_tb();
         // if (valid[0] == 1'b0) $display("Test case 1 passed!");
 		reset = 0;
 
+		// 1. Cache Read Miss
 		repeat (1) @(posedge clk);
 		ra0 = 30'b010101010101010101010101111111;
-		repeat (1) @(posedge clk);
-		assert(hit0 == 1'b0) else $error("hit0 should be 0 but is %b instead", hit0); // Cache Read Miss
-		if (hit0 == 1'b0) $display("Test case 1 passed! (Cache Read Miss)");
-		ra0 = 30'b0;
-		
 		ra1 = 30'b010101010101010101010101111111;
 		repeat (1) @(posedge clk);
-		assert(hit1 == 1'b0) else $error("hit1 should be 0 but is %b instead", hit1); // Cache Write Miss
+		assert(hit0 == 1'b0 && hit1 == 1'b0) else $error("hit0 should be 0 but is %b instead; hit1 should be 0 but is %b instead", hit0, hit1);
+		if (hit0 == 1'b0 && hit1 == 1'b0) $display("Test case 1 passed! (Cache Read Miss)");
+		ra0 = 30'b0;
+		
+		// 2. Cache Write Miss
+		ra1 = 30'b010101010101010101010101111111;
+		repeat (1) @(posedge clk);
+		assert(hit1 == 1'b0) else $error("hit1 should be 0 but is %b instead", hit1);
 		if (hit1 == 1'b0) $display("Test case 2 passed! (Cache Write Miss)");
 		wa = 30'b010101010101010101010101111111;
 		din = 2'b01;
 		we = 1;
 		repeat (1) @(posedge clk);
 
+		// 3. Cache Read Hit
 		ra0 = 30'b010101010101010101010101111111;
-		ra1 = 30'b0;
+		ra1 = 30'b010101010101010101010101111111;
 		wa = 30'b0;
 		din = 2'b00;
 		we = 0;
 		repeat (1) @(posedge clk);
 		assert(hit0 == 1'b1) else $error("hit0 should be 1 but is %b instead", hit0);
-		assert(dout0 == 2'b01) else $error("dout0 should be 01 but is %b instead", hit0);
-		if (hit0 == 1'b1 && dout0 == 2'b01) $display("Test case 3 passed! (Cache Read Hit)"); // Cache Read Hit
+		assert(dout0 == 2'b01) else $error("dout0 should be 01 but is %b instead", dout0);
+		assert(hit1 == 1'b1) else $error("hit1 should be 1 but is %b instead", hit1);
+		assert(dout1 == 2'b01) else $error("dout1 should be 01 but is %b instead", dout0);
+		if (hit0 == 1'b1 && dout0 == 2'b01 && hit1 == 1'b1 && dout1 == 2'b01) $display("Test case 3 passed! (Cache Read Hit)");
 
+		// 4. Cache Write Hit
 		ra1 = 30'b010101010101010101010101111111;
 		repeat (1) @(posedge clk);
-		assert(hit1 == 1'b1) else $error("hit1 should be 1 but is %b instead", hit1); // Cache Write Hit
+		assert(hit1 == 1'b1) else $error("hit1 should be 1 but is %b instead", hit1);
 		if (hit1 == 1'b1) $display("Test case 4 passed! (Cache Write Hit)");
-
 		wa = 30'b010101010101010101010101111111;
 		din = 2'b11;
 		we = 1;
-		repeat (1) @(posedge clk); // Cache Write Hit
+		repeat (1) @(posedge clk);
+
 		we = 0;
 		ra0 = 30'b010101010101010101010101111111;
-		assert(hit0 == 1'b1) else $error("hit0 should be 1 but is %b instead", hit0); // Cache Read Miss
-		if (hit0 == 1'b1) $display("Test case 5 passed! (Cache Write Hit/Read Miss)");
+		assert(hit0 == 1'b1) else $error("hit0 should be 1 but is %b instead", hit0); // Cache Read Hit
+		if (hit0 == 1'b1) $display("Test case 5 passed! (Cache Read Hit)");
 
-		// Cache Read Miss
+		// 5. Cache Eviction (same index, different tag)
 		ra0 = 30'b110101010101010101010101111111;
 		repeat (1) @(posedge clk);
 		assert(hit0 == 1'b0) else $error("hit0 should be 0 but is %b instead", hit0);
@@ -105,8 +112,7 @@ module bp_cache_tb();
 		assert(dout0 == 2'b10) else $error("dout0 should be 10 but is %b instead", dout0);
 		if (hit0 == 1'b1 && dout0 == 2'b10) $display("Test case 8 passed! (Cache Read After Eviction)");
 
-
-
+		// 6. Cache reset, invalidate all entries
 		reset = 1;
 		repeat (1) @(posedge clk);
 		reset = 0;

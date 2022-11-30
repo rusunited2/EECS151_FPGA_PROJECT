@@ -208,7 +208,7 @@ module cpu #(
         .clk(clk),
         .reset(rst),
         .pc_guess(pc_guess),
-        .is_br_check(is_br_check),
+        .is_br_guess(is_br_guess),
         .pc_check(pc_check),
         .is_br_check(is_br_check),
         .br_taken_check(br_taken_check),
