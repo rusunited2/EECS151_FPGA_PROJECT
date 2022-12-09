@@ -109,26 +109,23 @@ module cpu #(
     // TODO: Your code to implement a fully functioning RISC-V core
     // Add as many modules as you want
     // Feel free to move the memory modules around
-	// 1. WF ------------------------------------------------------
+	
+    // 1. WF Stage ------------------------------------------------------
 
-	// 1.1: pc_mux
+	// PC MUX
 	wire [2:0] pc_mux_sel;
-  	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3, pc_mux_in4;
+  	wire [31:0] pc_mux_in0, pc_mux_in1, pc_mux_in2, pc_mux_in3;
 	wire [31:0] pc_mux_out;
-	EIGHT_INPUT_MUX pc_mux (
+	FOUR_INPUT_MUX pc_mux (
 		.sel(pc_mux_sel),
 		.in0(pc_mux_in0),
 		.in1(pc_mux_in1),
 		.in2(pc_mux_in2),
 		.in3(pc_mux_in3),
-		.in4(pc_mux_in4),
-		.in5(0),
-		.in6(0),
-		.in7(0),
 		.out(pc_mux_out)
 	);
 
-	// 1.2: pc_plus_four
+	// PC_PLUS_FOUR (Output to BR_Taken and BP_ENABLE MUX to increment PC by 4 on next run if necessary)
     wire [31:0] pc_plus_four_in0;
     wire [31:0] pc_plus_four_out;
 	ADDER pc_plus_four (
@@ -137,30 +134,65 @@ module cpu #(
 		.out(pc_plus_four_out)
 	);
 
-	// 1.3: pc_register
+	// PC Register
 	wire [31:0] pc_register_d;
     reg [31:0] pc_register_q;
     always @(posedge clk) begin
         pc_register_q <= pc_register_d;
     end
 
-	// Wiring for WF stage
-    assign pc_plus_four_in0 = pc_register_q; // Changed Nov 10
-    // assign pc_mux_in2 = pc_plus_four_out;
-    assign pc_mux_in0 = RESET_PC;
+	// -------- Wiring for WF stage
 
+    // PC_PLUS_FOUR Input
+    assign pc_plus_four_in0 = pc_register_q;
+
+    // PC Register Input
     assign pc_register_d = pc_mux_out;
-    assign pc_mux_in4 = pc_register_q;
 
+    // BIOS Input (WF Stage Pipelined Stage)
     assign bios_addra = pc_mux_out[15:2];
-    assign imem_addrb = pc_mux_out[15:2];
 
-    // assign bios_ena = 1; // FIX THIS
+    // IMEM Input (WF Stage)
+    assign imem_addrb = pc_mux_out[15:2];
     always @(*) begin
         if (pc_mux_out[31:28] == 4'b0100) bios_ena = 1;
         else bios_ena = 0;
     end
-	// 2. D -------------------------------------------------------
+
+	// 2. D Stage -------------------------------------------------------
+    // PC Register at the end of the Decode Stage --> PC for the execute stage
+    wire [31:0] pc_decode_register_d;
+    reg [31:0] pc_decode_register_q;
+    always @(posedge clk) begin
+        pc_decode_register_q <= pc_decode_register_d;
+    end
+
+    // Instruction Register at end of decode stage --> Instruction for the execute stage
+    wire [31:0] instruction_decode_register_d;
+    reg [31:0] instruction_decode_register_q;
+    always @(posedge clk) begin
+        instruction_decode_register_q <= instruction_decode_register_d;
+    end
+
+    wire [31:0] br_pred_taken_register_d;
+    reg [31:0] br_pred_taken_register_q;
+    always @(posedge clk) begin
+        br_pred_taken_register_q <= br_pred_taken_register_d;
+    end
+
+    wire [31:0] rs1_register_d;
+    reg [31:0] rs1_register_q;
+    always @(posedge clk) begin
+        rs1_register_q <= rs1_register_d;
+    end
+
+    wire [31:0] rs2_register_d;
+    reg [31:0] rs2_register_q;
+    always @(posedge clk) begin
+        rs2_register_q <= rs2_register_d;
+    end
+
+    // PC[30] MUX to determine if BIOS or IMEM instruction
 	wire pc_thirty_mux_sel;
   	wire [31:0] pc_thirty_mux_in0, pc_thirty_mux_in1;
 	wire [31:0] pc_thirty_mux_out;
@@ -171,6 +203,7 @@ module cpu #(
 		.out(pc_thirty_mux_out)
 	);
 
+    // NOP Mux to NOP Decode Stage (for JALR or if BR prediction incorrect)
 	wire nop_mux_sel;
   	wire [31:0] nop_mux_in0;
 	wire [31:0] nop_mux_out;
@@ -181,6 +214,7 @@ module cpu #(
 		.out(nop_mux_out)
 	);
 
+    // RS1 Mux (output of reg file/2 cycle Hazard handling)
 	wire rs1_mux_sel;
   	wire [31:0] rs1_mux_in0, rs1_mux_in1;
 	wire [31:0] rs1_mux_out;
@@ -191,6 +225,7 @@ module cpu #(
 		.out(rs1_mux_out)
 	);
 
+    // RS2 Mux (output of reg file/2 cycle Hazard handling)
 	wire rs2_mux_sel;
   	wire [31:0] rs2_mux_in0, rs2_mux_in1;
 	wire [31:0] rs2_mux_out;
@@ -248,37 +283,7 @@ module cpu #(
 		.out(bp_pred_taken_mux_out)
 	);
 
-    wire [31:0] pc_decode_register_d;
-    reg [31:0] pc_decode_register_q;
-    always @(posedge clk) begin
-        pc_decode_register_q <= pc_decode_register_d;
-    end
-
-    wire [31:0] instruction_decode_register_d;
-    reg [31:0] instruction_decode_register_q;
-    always @(posedge clk) begin
-        instruction_decode_register_q <= instruction_decode_register_d;
-    end
-
-    wire [31:0] br_pred_taken_register_d;
-    reg [31:0] br_pred_taken_register_q;
-    always @(posedge clk) begin
-        br_pred_taken_register_q <= br_pred_taken_register_d;
-    end
-
-    wire [31:0] rs1_register_d;
-    reg [31:0] rs1_register_q;
-    always @(posedge clk) begin
-        rs1_register_q <= rs1_register_d;
-    end
-
-    wire [31:0] rs2_register_d;
-    reg [31:0] rs2_register_q;
-    always @(posedge clk) begin
-        rs2_register_q <= rs2_register_d;
-    end
-
-	// jal_adder
+    // JAL adder in Decode Stage
     wire [31:0] jal_adder_in0, jal_adder_in1;
     wire [31:0] jal_adder_out;
 	ADDER jal_adder (
@@ -288,26 +293,28 @@ module cpu #(
 	);
 	
 	// Wiring for D stage
+    // Inputs to PC[30] MUX (determine if take imem or bios output)
 	assign pc_thirty_mux_in0 = imem_doutb;
 	assign pc_thirty_mux_in1 = bios_douta;
 	
+    // Input to NOP Mux (PC[30] Mux output or NOP Instruction)
 	assign nop_mux_in0 = pc_thirty_mux_out;
 
-    assign pc_decode_register_d = pc_register_q; // for pc pipeline register in decode stage
-	assign instruction_decode_register_d = nop_mux_out; // for instruction pipeline register in decode stage
+    // Input to PC_Decode Register
+    assign pc_decode_register_d = pc_register_q;
 
-    // wiring to regfile
+    // Input to Instruction Decode Register
+	assign instruction_decode_register_d = nop_mux_out;
+
+    // Regfile Inputs for registers to read from
     assign ra1 = nop_mux_out[19:15];
     assign ra2 = nop_mux_out[24:20];
 
+    // JAL Adder Inputs
 	assign jal_adder_in0 = pc_register_q;
 	assign jal_adder_in1 = {{20{nop_mux_out[31]}}, nop_mux_out[19:12], nop_mux_out[20], nop_mux_out[30:21], 1'b0};
 
-	assign pc_mux_in1 = jal_adder_out;
-
-	assign rs1_mux_in0 = rd1;
-	assign rs2_mux_in0 = rd2;
-
+    // Inputs to RS1 and RS2 registers in between the decode --> execute stage
 	assign rs1_register_d = rs1_mux_out;
 	assign rs2_register_d = rs2_mux_out;
 
@@ -325,38 +332,35 @@ module cpu #(
     assign bp_enable_mux_in0 = pc_plus_four_out;
     assign bp_enable_mux_in1 = br_taken_mux_out;
 
-    // PC Sel Input 2
-    assign pc_mux_in2 = bp_enable_mux_out;
-
     // BR Pred Taken/Not Taken and BR Pred Taken Register
     assign bp_pred_taken_mux_sel= bp_enable;
     assign bp_pred_taken_mux_in0 = 0; // For no Branch prediction (always guess not taken)
     assign bp_pred_taken_mux_in1 = br_pred_taken; // Branch prediction output
     assign br_pred_taken_register_d = bp_pred_taken_mux_out;
 
-	// 3. X -------------------------------------------------------
-
+	// 3. X Stage -------------------------------------------------------
+    // Instruction Register (Execute --> WF Stage)
     wire [31:0] instruction_execute_register_d;
     reg [31:0] instruction_execute_register_q;
     always @(posedge clk) begin
         instruction_execute_register_q <= instruction_execute_register_d;
     end
 
-    // PC Pipeline Register Execute Stage
+    // PC Pipeline Register Execute Stage (Execute --> WF Stage)
     wire [31:0] pc_execute_register_d;
     reg [31:0] pc_execute_register_q;
     always @(posedge clk) begin
         pc_execute_register_q <= pc_execute_register_d;
     end
 
-    // ALU Pipeline Register
+    // ALU Pipeline Register (Takes ALU Output)
     wire [31:0] alu_register_d;
     reg [31:0] alu_register_q;
     always @(posedge clk) begin
         alu_register_q <= alu_register_d;
     end
 
-	// imm_gen
+	// IMM GEN
 	wire [31:0] imm_gen_in;
 	wire [31:0] imm_gen_out;
 	IMM_GEN imm_gen (
@@ -364,7 +368,7 @@ module cpu #(
 		.imm(imm_gen_out)
 	);
 
-    // RS1_MUX2
+    // RS1_MUX2 (First RS1 MUX of Execute Pipeline handling ALU-ALU and MEM-ALU Hazard)
 	wire [1:0] rs1_mux2_sel;
   	wire [31:0] rs1_mux2_in0, rs1_mux2_in1, rs1_mux2_in2;
 	wire [31:0] rs1_mux2_out;
@@ -377,7 +381,7 @@ module cpu #(
 		.out(rs1_mux2_out)
 	);
 
-    // RS2_MUX2
+    // RS2_MUX2 (First RS2 MUX of Execute Pipeline handling ALU-ALU and MEM-ALU Hazard)
 	wire [1:0] rs2_mux2_sel;
   	wire [31:0] rs2_mux2_in0, rs2_mux2_in1, rs2_mux2_in2;
 	wire [31:0] rs2_mux2_out;
@@ -404,7 +408,7 @@ module cpu #(
 		.br_lt(branch_comp_br_lt)
 	);
 
-    // A_MUX
+    // A_MUX (Takes in PC and MEM-MEM Hazard)
     wire [1:0] a_mux_sel;
     wire [31:0] a_mux_in0, a_mux_in1, a_mux_in2;
     wire [31:0] a_mux_out;
@@ -440,34 +444,6 @@ module cpu #(
         .out(alu_out)
     );
 
-    // CSR
-    wire [1:0] csr_mux_sel;
-    wire [31:0] csr_mux_in0, csr_mux_in1, csr_mux_in2;
-    wire [31:0] csr_mux_out;
-    FOUR_INPUT_MUX csr_mux (
-		.sel(csr_mux_sel),
-		.in0(csr_mux_in0),
-		.in1(csr_mux_in1),
-		.in2(csr_mux_in2),
-		.in3(0),
-		.out(csr_mux_out)
-	);
-
-    // wire br_result_mux_sel;
-    // wire [31:0] br_result_mux_in0, br_result_mux_in1;
-    // wire [31:0] br_result_mux_out;
-    // TWO_INPUT_MUX br_result_mux (
-	// 	.sel(br_result_mux_sel),
-	// 	.in0(br_result_mux_in0),
-	// 	.in1(br_result_mux_in1),
-	// 	.out(br_result_mux_out)
-	// );
-
-    wire [31:0] csr_in;
-    always @(posedge clk) begin
-        tohost_csr <= csr_in;
-    end
-
     // rs2_mux3 (MUX going to memory from rs2)
     wire [1:0] rs2_mux3_sel;
   	wire [31:0] rs2_mux3_in0, rs2_mux3_in1, rs2_mux3_in2;
@@ -480,65 +456,12 @@ module cpu #(
 		.in3(0),
 		.out(rs2_mux3_out)
 	);
-    
-    reg [1:0] addr_mux_sel;
-  	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
-	wire [31:0] addr_mux_out;
-	FOUR_INPUT_MUX addr (
-		.sel(addr_mux_sel),
-		.in0(addr_mux_in0),
-		.in1(addr_mux_in1),
-		.in2(addr_mux_in2),
-		.in3(addr_mux_in3),
-		.out(addr_mux_out)
-	);
-
-    // For addr_mux_sel (output of memories)
-    always @(*) begin
-        case(alu_register_q[31:28])
-            4'b0001: addr_mux_sel = 2'b01;
-            4'b0011: addr_mux_sel = 2'b01;
-            4'b0100: addr_mux_sel = 2'b00;
-            4'b1000: addr_mux_sel = 2'b10;
-            default: begin
-                addr_mux_sel = 2'b01;
-            end
-        endcase
-    end
-
-    wire [31:0] ldx_in;
-    wire [2:0] ldx_sel;
-    wire [31:0] ldx_out;
-	wire [31:0] ldx_alu_out;
-    LDX ldx (
-        .ldx_in(ldx_in), 
-        .ldx_sel(ldx_sel), 
-        .ldx_out(ldx_out),
-		.alu_out(ldx_alu_out)
-    );
-
-    wire [31:0] pc_plus_four2_in0;
-    wire [31:0] pc_plus_four2_out;
-	ADDER pc_plus_four2 (
-		.in0(pc_plus_four2_in0),
-		.in1(32'd4),
-		.out(pc_plus_four2_out)
-	);
-
-    wire [1:0] wb_mux_sel;
-  	wire [31:0] wb_mux_in0, wb_mux_in1, wb_mux_in2, wb_mux_in3;
-	wire [31:0] wb_mux_out;
-	FOUR_INPUT_MUX wb_mux (
-		.sel(wb_mux_sel),
-		.in0(wb_mux_in0),
-		.in1(wb_mux_in1),
-		.in2(wb_mux_in2),
-		.in3(wb_mux_in3),
-		.out(wb_mux_out)
-	);
 
 	// Wiring for X stage
+    // Input to Instruction Decode Register
 	assign instruction_execute_register_d = instruction_decode_register_q;
+    
+    // Input to Immediate Generator
 	assign imm_gen_in = instruction_decode_register_q;
 
     // PC Execute Register Input
@@ -547,79 +470,69 @@ module cpu #(
     // ALU Pipeline Register Input
     assign alu_register_d = alu_out;
 
-    // rs1_mux2 inputs
-	assign rs1_mux2_in0 = rs1_register_q;
-	assign rs1_mux2_in1 = alu_register_q; // ALU->ALU forwarding
-	assign rs1_mux2_in2 = ldx_out; // MEM->ALU forwarding
-
-	assign rs2_mux2_in0 = rs2_register_q;
-	assign rs2_mux2_in1 = alu_register_q; // ALU->ALU forwarding
-	assign rs2_mux2_in2 = ldx_out; // MEM->ALU forwarding
-
-    // inputs to branch comparator
+    // Inputs to branch comparator
     assign branch_comp_rs1 = rs1_mux2_out;
     assign branch_comp_rs2 = rs2_mux2_out;
 
-    // inputs to A-MUX
-    assign a_mux_in0 = rs1_mux2_out;
-    assign a_mux_in1 = pc_decode_register_q;
-    assign a_mux_in2 = ldx_out; // temp
-
-    // inputs to B-MUX
+    // Inputs to B-MUX
     assign b_mux_in0 = rs2_mux2_out;
     assign b_mux_in1 = imm_gen_out;
 
-    // inputs to ALU
+    // Inputs to ALU
     assign alu_rs1 = a_mux_out;
     assign alu_rs2 = b_mux_out;
     assign alu_pc = pc_decode_register_q;
-
-    // inputs to CSR_MUX
-    assign csr_mux_in0 = csr_in;
-    assign csr_mux_in1 = imm_gen_out;
-    assign csr_mux_in2 = rs1_mux2_out;
-
-    // input to CSR register
-    assign csr_in = csr_mux_out;
-
-    // inputs to RS2_MUX3
-    assign rs2_mux3_in0 = rs2_mux2_out;
-    assign rs2_mux3_in1 = alu_register_q; // temp
-    assign rs2_mux3_in2 = ldx_out; // temp
-
-    // send ALU result back to PC_SEL MUX
-    // assign pc_mux_in3 = alu_out;
-
-	// Input to ldx for lw, lh and lb
-	assign ldx_alu_out = alu_register_q;
-
-
-    // FORWARD DATA D TO RS1_MUX and RS2_MUX
-    assign rs1_mux_in1 = wb_mux_out;
-    assign rs2_mux_in1 = wb_mux_out;
 
     // Branch Prediction Wiring
     assign pc_check = pc_decode_register_q;
     assign is_br_check = instruction_decode_register_q[6:2] == `OPC_BRANCH_5;
 
-    // BR Result Mux (output to PC_SEL = 3)
-    // assign br_result_mux_in0 = alu_out;
-    // assign br_result_mux_in1 = pc_decode_register_q + 4;
-    // assign pc_mux_in3 = br_result_mux_out;
+    // All PC_MUX Inputs (Due to reliance on other Pipeline Stages)
+    assign pc_mux_in0 = RESET_PC;
+    assign pc_mux_in1 = jal_adder_out;
+    assign pc_mux_in2 = bp_enable_mux_out;
     assign pc_mux_in3 = alu_out;
 
     // --------------------------------------------MEMORY ASSIGNS
+    // ---- CSR
+    // CSR MUX (Handling itself, RS1, Immediate)
+    wire [1:0] csr_mux_sel;
+    wire [31:0] csr_mux_in0, csr_mux_in1, csr_mux_in2;
+    wire [31:0] csr_mux_out;
+    FOUR_INPUT_MUX csr_mux (
+		.sel(csr_mux_sel),
+		.in0(csr_mux_in0),
+		.in1(csr_mux_in1),
+		.in2(csr_mux_in2),
+		.in3(0),
+		.out(csr_mux_out)
+	);
+
+    // CSR Register
+    wire [31:0] csr_in;
+    always @(posedge clk) begin
+        tohost_csr <= csr_in;
+    end
+
+    // Inputs to CSR_MUX
+    assign csr_mux_in0 = csr_in;
+    assign csr_mux_in1 = imm_gen_out;
+    assign csr_mux_in2 = rs1_mux2_out;
+
+    // Input to CSR register
+    assign csr_in = csr_mux_out;
 
 
-    // input to DMEM
+    // ----- DMEM
+    // Input to DMEM
     assign dmem_addr = alu_out[15:2];
 
-	// Russel added this for tests 33-40 (store + LUI)
+	// DMEM_Din
 	always @(*) begin
 		dmem_din = rs2_mux3_out << (8 * alu_out[1:0]);
 	end
 
-    //assign dmem_din = rs2_mux3_out;
+    //DMEM_Den
     always @(*) begin
         case(instruction_decode_register_q[6:2])
             `OPC_LOAD_5: begin
@@ -636,19 +549,49 @@ module cpu #(
         endcase
     end
 
-    // output of dmem = dmem_dout
+    // Combinational logic for dmem write enable
+	always @(*) begin
+		if (instruction_decode_register_q[6:2] == `OPC_STORE_5) begin
+			if (alu_out[1:0] == 0) begin
+				case(instruction_decode_register_q[14:12])
+    				3'b000: dmem_we = 4'b0001; // temp what are these values
+					3'b001: dmem_we = 4'b0011;
+					3'b010: dmem_we = 4'b1111;
+                    default: dmem_we = 4'b0000;
+				endcase
+			end
+			else if (alu_out[1:0] == 1 && instruction_decode_register_q[14:12] == 3'b000) begin
+				dmem_we = 4'b0010;
+			end
+			else if (alu_out[1:0] == 2) begin
+				case(instruction_decode_register_q[14:12])
+    				3'b000: dmem_we = 4'b0100; // temp what are these values
+					3'b001: dmem_we = 4'b1100;
+                    default: dmem_we = 4'b0000;
+				endcase
+			end
+			else if (alu_out[1:0] == 3 && instruction_decode_register_q[14:12] == 3'b000) begin
+				dmem_we = 4'b1000;
+			end
+            else dmem_we = 4'b0000;
+		end
+        else dmem_we = 4'b0000;
+	end
 
-    // input to BIOS
+    // ----- BIOS
+    // BIOS_Enb
     assign bios_addrb = alu_out[13:2];
     always @(*) begin
         if (instruction_decode_register_q[6:2] == `OPC_LOAD_5 && alu_out[31:28] == 4'b0100) bios_enb = 1;
         else bios_enb = 0;
     end
 
-    // input to IMEM
-    assign imem_addra = alu_out[15:2]; // correct
-    assign imem_dina = rs2_mux3_out; // correct
-
+    // ----- IMEM
+    // IMEM ADDRa
+    assign imem_addra = alu_out[15:2];
+    // IMEM DinA
+    assign imem_dina = rs2_mux3_out;
+    // IMEM EN A
     always @(*) begin
         if (instruction_decode_register_q[6:2] == `OPC_STORE_5 && (alu_out[31:28] == 4'b0010 || alu_out[31:28] == 4'b0011) && pc_decode_register_q[30] == 1'b1) begin
             imem_ena = 1;
@@ -658,7 +601,37 @@ module cpu #(
         end
     end
 
-    // input to UART
+    // IMEM WEA
+    always @(*) begin
+		if (instruction_decode_register_q[6:2] == `OPC_STORE_5) begin
+			if (alu_out[1:0] == 0) begin
+				case(instruction_decode_register_q[14:12])
+    				3'b000: imem_wea = 4'b0001; // temp what are these values
+					3'b001: imem_wea = 4'b0011;
+					3'b010: imem_wea = 4'b1111;
+                    default: imem_wea = 4'b0000;
+				endcase
+			end
+			else if (alu_out[1:0] == 1 && instruction_decode_register_q[14:12] == 3'b000) begin
+				imem_wea = 4'b0010;
+			end
+			else if (alu_out[1:0] == 2) begin
+				case(instruction_decode_register_q[14:12])
+    				3'b000: imem_wea = 4'b0100; // temp what are these values
+					3'b001: imem_wea = 4'b1100;
+                    default: imem_wea = 4'b0000;
+				endcase
+			end
+			else if (alu_out[1:0] == 3 && instruction_decode_register_q[14:12] == 3'b000) begin
+				imem_wea = 4'b1000; // temp what are these values
+			end
+            else imem_wea = 4'b0000;
+		end
+        else imem_wea = 4'b0000;
+	end
+
+    // ----- UART
+    // UART Wire/Reg Assignments
     wire [31:0] uart_lw_instruction,uart_sw_instruction, uart_lw_addr, uart_sw_addr;
     reg [31:0] uart_out;
 
@@ -683,6 +656,67 @@ module cpu #(
         end
     end
 
+    // 1. WF Stage Continued -------------------------------------------------------
+    // ADDR MUX
+    reg [1:0] addr_mux_sel;
+  	wire [31:0] addr_mux_in0, addr_mux_in1, addr_mux_in2, addr_mux_in3;
+	wire [31:0] addr_mux_out;
+	FOUR_INPUT_MUX addr (
+		.sel(addr_mux_sel),
+		.in0(addr_mux_in0),
+		.in1(addr_mux_in1),
+		.in2(addr_mux_in2),
+		.in3(addr_mux_in3),
+		.out(addr_mux_out)
+	);
+
+    // LDX MUX
+    wire [31:0] ldx_in;
+    wire [2:0] ldx_sel;
+    wire [31:0] ldx_out;
+	wire [31:0] ldx_alu_out;
+    LDX ldx (
+        .ldx_in(ldx_in), 
+        .ldx_sel(ldx_sel), 
+        .ldx_out(ldx_out),
+		.alu_out(ldx_alu_out)
+    );
+
+    // PC_PLUS_FOUR MUX in WF Stage (Input to WB MUX)
+    wire [31:0] pc_plus_four2_in0;
+    wire [31:0] pc_plus_four2_out;
+	ADDER pc_plus_four2 (
+		.in0(pc_plus_four2_in0),
+		.in1(32'd4),
+		.out(pc_plus_four2_out)
+	);
+
+    // WB MUX
+    wire [1:0] wb_mux_sel;
+  	wire [31:0] wb_mux_in0, wb_mux_in1, wb_mux_in2, wb_mux_in3;
+	wire [31:0] wb_mux_out;
+	FOUR_INPUT_MUX wb_mux (
+		.sel(wb_mux_sel),
+		.in0(wb_mux_in0),
+		.in1(wb_mux_in1),
+		.in2(wb_mux_in2),
+		.in3(wb_mux_in3),
+		.out(wb_mux_out)
+	);
+
+    // Logic for addr_mux_sel (output of memories)
+    always @(*) begin
+        case(alu_register_q[31:28])
+            4'b0001: addr_mux_sel = 2'b01;
+            4'b0011: addr_mux_sel = 2'b01;
+            4'b0100: addr_mux_sel = 2'b00;
+            4'b1000: addr_mux_sel = 2'b10;
+            default: begin
+                addr_mux_sel = 2'b01;
+            end
+        endcase
+    end
+
     // addr MUX input
     assign addr_mux_in0 = bios_doutb;
     assign addr_mux_in1 = dmem_dout;
@@ -691,31 +725,54 @@ module cpu #(
     
     // ldx input
     assign ldx_in = addr_mux_out;
+	assign ldx_alu_out = alu_register_q;
 
     // pc + 4 in execute stage input
     assign pc_plus_four2_in0 = pc_execute_register_q;
 
-    // wb mux
+    // WB mux
     assign wb_mux_in0 = ldx_out;
     assign wb_mux_in1 = alu_register_q;
     assign wb_mux_in2 = pc_plus_four2_out;
 
-    // writeback to regfile
+    // Writeback to regfile
     assign wa = instruction_execute_register_q[11:7];
     assign wd = wb_mux_out;
+
+    // RS1_MUX2 inputs (Here due to Forwarding)
+	assign rs1_mux2_in0 = rs1_register_q;
+	assign rs1_mux2_in1 = alu_register_q; // ALU->ALU forwarding
+	assign rs1_mux2_in2 = ldx_out; // MEM->ALU forwarding
+
+    // RS2_MUX2 inputs (Here due to forwarding)
+	assign rs2_mux2_in0 = rs2_register_q;
+	assign rs2_mux2_in1 = alu_register_q; // ALU->ALU forwarding
+	assign rs2_mux2_in2 = ldx_out; // MEM->ALU forwarding
+
+    // RS1_MUX Assignments (Handles 2 Cycle Hazard)
+    assign rs1_mux_in0 = rd1;
+    assign rs1_mux_in1 = wb_mux_out;
+
+    // RS2_MUX Assignments (Handles 2 Cycle Hazard)
+    assign rs2_mux_in0 = rd2;
+    assign rs2_mux_in1 = wb_mux_out;
+
+    // Inputs to A-MUX (Due to forwarding/MEM-MEM)
+    assign a_mux_in0 = rs1_mux2_out;
+    assign a_mux_in1 = pc_decode_register_q;
+    assign a_mux_in2 = ldx_out;
+
+    // Inputs to RS2_MUX3 (Due to forwarding/MEM-MEM)
+    assign rs2_mux3_in0 = rs2_mux2_out;
+    assign rs2_mux3_in1 = alu_register_q;
+    assign rs2_mux3_in2 = ldx_out;
     
 
-
     // ------------------- WF CONTROL LOGIC
-    wire [31:0] wf_instruction;
-    wire [31:0] wf_x_instruction;
-    wire wf_rf_we;
-    wire [1:0] wf_wb_sel;
+    wire [31:0] wf_instruction, wf_x_instruction;
     wire [2:0] wf_ldx_sel, wf_pc_sel;
-	wire wf_br_taken;
-    wire wf_jal;
-    wire wf_jalr;
-    wire wf_br_pred_correct;
+    wire [1:0] wf_wb_sel;
+    wire wf_rf_we, wf_br_taken, wf_jal, wf_jalr, wf_br_pred_correct;
     WF_CU wf_cu (
         .rst(rst),
         .instruction(wf_instruction), 
@@ -730,25 +787,28 @@ module cpu #(
         .br_pred_correct(wf_br_pred_correct)
     );
 
-    assign wf_instruction = instruction_execute_register_q; // check this if reset we need to change control logic
-    assign we = wf_rf_we;
-    assign wb_mux_sel = wf_wb_sel;
-    assign ldx_sel = wf_ldx_sel;
-    assign pc_mux_sel = wf_pc_sel;
+    // WF Control Logic Inputs
+    assign wf_instruction = instruction_execute_register_q;
+    assign wf_x_instruction = instruction_decode_register_q;
     assign wf_jal = (nop_mux_out[6:2] == `OPC_JAL_5) ? 1 : 0;
     assign wf_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
-    assign wf_x_instruction = instruction_decode_register_q;
+    
+    // WB MUX Sel
+    assign wb_mux_sel = wf_wb_sel;
 
+    // LDX MUX Sel
+    assign ldx_sel = wf_ldx_sel;
+
+    // PC MUX Sel
+    assign pc_mux_sel = wf_pc_sel;
+
+    // Write Enable for Reg File
+    assign we = wf_rf_we;
 
     // ------------------ D CONTROL LOGIC
-    wire [31:0] d_instruction;
-    wire [31:0] d_pc;
-    wire [31:0] d_wf_instruction;
-    wire [31:0] d_x_instruction;
+    wire [31:0] d_instruction, d_x_instruction, d_wf_instruction, d_pc;
     wire d_pc_thirty, d_nop_sel, d_orange_sel, d_green_sel;
-    wire d_jalr;
-    wire d_br_taken;
-    wire d_br_pred_correct;
+    wire d_jalr, d_br_taken, d_br_pred_correct;
     D_CU d_cu (
         .instruction(d_instruction), 
         .pc(d_pc), 
@@ -763,24 +823,31 @@ module cpu #(
         .br_pred_correct(d_br_pred_correct)
     );
 
+    // D Control Logic Inputs
     assign d_instruction = nop_mux_out;
     assign d_pc = pc_register_q;
-    assign pc_thirty_mux_sel = d_pc_thirty; // TEMP (FIX THIS)
-    assign nop_mux_sel = d_nop_sel;
-    assign rs1_mux_sel = d_orange_sel;
-    assign rs2_mux_sel = d_green_sel;
     assign d_jalr = (instruction_decode_register_q[6:2] == `OPC_JALR_5) ? 1 : 0;
     assign d_wf_instruction = instruction_execute_register_q;
     assign d_x_instruction = instruction_decode_register_q;
+
+    // PC Thirty MUX Sel
+    assign pc_thirty_mux_sel = d_pc_thirty;
+
+    // NOP MUX Sel
+    assign nop_mux_sel = d_nop_sel;
+
+    // RS1 MUX Sel
+    assign rs1_mux_sel = d_orange_sel;
+
+    // RS2 MUX Sel
+    assign rs2_mux_sel = d_green_sel;
     
     // ------------------- EX CONTROL LOGIC
     wire [31:0] x_instruction, x_wf_instruction;
-    wire x_br_eq, x_br_lt;
-    wire x_br_un, x_b_sel;
-    wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel, x_csr_sel;
     wire [3:0] x_alu_sel;
-	wire x_br_taken;
-    wire x_br_pred_taken, x_br_pred_correct, x_br_result;
+    wire [1:0] x_orange_sel, x_green_sel, x_a_sel, x_rs2_sel, x_csr_sel;
+    wire x_br_eq, x_br_lt, x_br_un, x_b_sel;
+	wire x_br_taken, x_br_pred_taken, x_br_pred_correct, x_br_result;
     X_CU x_cu (
         .instruction(x_instruction), 
         .orange_sel(x_orange_sel), 
@@ -800,35 +867,44 @@ module cpu #(
         .br_result(x_br_result)
     );
 
-    // EX Control Logic wires
+    // EX Control Logic Inputs
     assign x_instruction = instruction_decode_register_q;
     assign x_br_eq = branch_comp_br_eq;
     assign x_br_lt = branch_comp_br_lt;
+    assign x_wf_instruction = instruction_execute_register_q;
+    assign x_br_pred_taken = br_pred_taken_register_q;
+
+    // Branch Comparator BR UN Input Assignment
     assign branch_comp_br_un = x_br_un;
+
+    // RS1_MUX2 and RS2_MUX2 Sel
     assign rs1_mux2_sel = x_orange_sel;
     assign rs2_mux2_sel = x_green_sel;
+
+    // A_MUX Sel and B_MUX Sel and RS2_MUX3 Sel
     assign a_mux_sel = x_a_sel;
     assign b_mux_sel = x_b_sel;
     assign rs2_mux3_sel = x_rs2_sel;
-    assign alu_sel = x_alu_sel;
-    assign csr_mux_sel = x_csr_sel;
-	assign wf_br_taken = x_br_taken;
-	assign x_wf_instruction = instruction_execute_register_q;
-    assign x_br_pred_taken = br_pred_taken_register_q;
 
+    // ALU Sel
+    assign alu_sel = x_alu_sel;
+
+    // CSR MUX Sel
+    assign csr_mux_sel = x_csr_sel;
+
+    // BR_Taken Input to WF Control Logic and D Control Logic
+	assign wf_br_taken = x_br_taken;
     assign d_br_taken = x_br_taken;
 
     // Wiring for Branch Predictor
     assign br_taken_check = x_br_taken;
 
-    // Wiring for BR Result Mux
-    // assign br_result_mux_sel = x_br_result;
-
-    // Wiring for br_pred_correct to other modules
+    // Wiring for br_pred_correct to WF Control Logic and D Control Logic
     assign wf_br_pred_correct = x_br_pred_correct;
     assign d_br_pred_correct = x_br_pred_correct;
 
-    // UART Output and Counters (need to move at bottom due to br_pred_correct)
+    // --- UART Output and Counters (need to move at bottom due to br_pred_correct)
+
     // Cycle Counter
     reg [31:0] cycle_counter = 0;
     always @(posedge clk) begin
@@ -873,62 +949,4 @@ module cpu #(
             end
         endcase
     end
-
-	// Combinational logic for dmem write enable (Russel added this for tests 33-40)
-	always @(*) begin
-		if (x_instruction[6:2] == `OPC_STORE_5) begin
-			if (alu_out[1:0] == 0) begin
-				case(x_instruction[14:12])
-    				3'b000: dmem_we = 4'b0001; // temp what are these values
-					3'b001: dmem_we = 4'b0011;
-					3'b010: dmem_we = 4'b1111;
-                    default: dmem_we = 4'b0000;
-				endcase
-			end
-			else if (alu_out[1:0] == 1 && x_instruction[14:12] == 3'b000) begin
-				dmem_we = 4'b0010;
-			end
-			else if (alu_out[1:0] == 2) begin
-				case(x_instruction[14:12])
-    				3'b000: dmem_we = 4'b0100; // temp what are these values
-					3'b001: dmem_we = 4'b1100;
-                    default: dmem_we = 4'b0000;
-				endcase
-			end
-			else if (alu_out[1:0] == 3 && x_instruction[14:12] == 3'b000) begin
-				dmem_we = 4'b1000;
-			end
-            else dmem_we = 4'b0000;
-		end
-        else dmem_we = 4'b0000;
-	end
-
-    // IMEM WEA
-    always @(*) begin
-		if (x_instruction[6:2] == `OPC_STORE_5) begin
-			if (alu_out[1:0] == 0) begin
-				case(x_instruction[14:12])
-    				3'b000: imem_wea = 4'b0001; // temp what are these values
-					3'b001: imem_wea = 4'b0011;
-					3'b010: imem_wea = 4'b1111;
-                    default: imem_wea = 4'b0000;
-				endcase
-			end
-			else if (alu_out[1:0] == 1 && x_instruction[14:12] == 3'b000) begin
-				imem_wea = 4'b0010;
-			end
-			else if (alu_out[1:0] == 2) begin
-				case(x_instruction[14:12])
-    				3'b000: imem_wea = 4'b0100; // temp what are these values
-					3'b001: imem_wea = 4'b1100;
-                    default: imem_wea = 4'b0000;
-				endcase
-			end
-			else if (alu_out[1:0] == 3 && x_instruction[14:12] == 3'b000) begin
-				imem_wea = 4'b1000; // temp what are these values
-			end
-            else imem_wea = 4'b0000;
-		end
-        else imem_wea = 4'b0000;
-	end
 endmodule
