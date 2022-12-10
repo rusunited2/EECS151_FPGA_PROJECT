@@ -63,9 +63,9 @@ module ADDER(in0, in1, out);
 endmodule // ADDER
 
 // ALU
-module ALU(alu_sel, rs1, rs2, out);
+module ALU(alu_sel, rs1, rs2, pc, out);
   input [3:0] alu_sel;
-  input [31:0] rs1, rs2;
+  input [31:0] rs1, rs2, pc;
   output reg [31:0] out;
   
   always @(*) begin
@@ -81,6 +81,7 @@ module ALU(alu_sel, rs1, rs2, out);
 	  4'b1000: out = ($signed(rs1) < $signed(rs2)) ? 1 : 0; // slt
 	  4'b1001: out = (rs1 < rs2) ? 1 : 0; // sltu
 	  4'b1010: out = rs2;
+	  4'b1011: out = pc + 4;
 	  default: out = 0; // For error/default case
 	endcase
   end
