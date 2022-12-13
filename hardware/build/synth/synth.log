@@ -1,0 +1,540 @@
+
+****** Vivado v2021.1 (64-bit)
+  **** SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+  **** IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+    ** Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+source /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/scripts/synth.tcl
+# source ../target.tcl
+## set ABS_TOP                        /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware
+## set TOP                            z1top
+## set FPGA_PART                      xc7z020clg400-1
+## set_param general.maxThreads       4
+## set_param general.maxBackupLogs    0
+## set RTL { /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/clocks.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/button_parser.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/edge_detector.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/fifo.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_receiver.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_transmitter.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/bios_mem.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/dmem.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/imem.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memory_io.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/bp_cache.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/branch_predictor.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/sat_updn.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/cpu.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/reg_file.v /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.v }
+## set CONSTRAINTS { /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc }
+# if {[string trim ${RTL}] ne ""} {
+#   read_verilog -sv ${RTL}
+# }
+# if {[string trim ${CONSTRAINTS}] ne ""} {
+#   read_xdc ${CONSTRAINTS}
+# }
+# synth_design -verilog_define SYNTHESIS -verilog_define ABS_TOP=${ABS_TOP} -top ${TOP} -part ${FPGA_PART} -include_dirs ${ABS_TOP}/src/riscv_core
+Command: synth_design -verilog_define SYNTHESIS -verilog_define ABS_TOP=/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware -top z1top -part xc7z020clg400-1 -include_dirs /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Device 21-403] Loading part xc7z020clg400-1
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 4 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 15138
+WARNING: [Synth 8-2507] parameter declaration becomes local in fifo with formal parameter declaration list [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/fifo.v:24]
+WARNING: [Synth 8-2507] parameter declaration becomes local in fifo with formal parameter declaration list [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/fifo.v:25]
+WARNING: [Synth 8-2507] parameter declaration becomes local in fifo with formal parameter declaration list [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/fifo.v:26]
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 2562.727 ; gain = 0.000 ; free physical = 2363 ; free virtual = 13659
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'z1top' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.v:1]
+INFO: [Synth 8-6157] synthesizing module 'synchronizer' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'synchronizer' (1#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+INFO: [Synth 8-6157] synthesizing module 'clocks' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/clocks.v:1]
+	Parameter CPU_CLK_CLKFBOUT_MULT bound to: 48 - type: integer 
+	Parameter CPU_CLK_DIVCLK_DIVIDE bound to: 5 - type: integer 
+	Parameter CPU_CLK_CLKOUT_DIVIDE bound to: 15 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'BUFG' [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:1083]
+INFO: [Synth 8-6155] done synthesizing module 'BUFG' (2#1) [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:1083]
+INFO: [Synth 8-6157] synthesizing module 'PLLE2_ADV' [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:84453]
+	Parameter BANDWIDTH bound to: OPTIMIZED - type: string 
+	Parameter CLKFBOUT_MULT bound to: 48 - type: integer 
+	Parameter CLKFBOUT_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKIN1_PERIOD bound to: 8.000000 - type: double 
+	Parameter CLKOUT0_DIVIDE bound to: 15 - type: integer 
+	Parameter CLKOUT0_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT0_PHASE bound to: 0.000000 - type: double 
+	Parameter COMPENSATION bound to: BUF_IN - type: string 
+	Parameter DIVCLK_DIVIDE bound to: 5 - type: integer 
+	Parameter STARTUP_WAIT bound to: FALSE - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'PLLE2_ADV' (3#1) [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:84453]
+INFO: [Synth 8-6157] synthesizing module 'PLLE2_ADV__parameterized0' [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:84453]
+	Parameter BANDWIDTH bound to: OPTIMIZED - type: string 
+	Parameter CLKFBOUT_MULT bound to: 36 - type: integer 
+	Parameter CLKFBOUT_PHASE bound to: 0.000000 - type: double 
+	Parameter CLKIN1_PERIOD bound to: 8.000000 - type: double 
+	Parameter CLKOUT0_DIVIDE bound to: 6 - type: integer 
+	Parameter CLKOUT0_DUTY_CYCLE bound to: 0.500000 - type: double 
+	Parameter CLKOUT0_PHASE bound to: 0.000000 - type: double 
+	Parameter COMPENSATION bound to: BUF_IN - type: string 
+	Parameter DIVCLK_DIVIDE bound to: 5 - type: integer 
+	Parameter STARTUP_WAIT bound to: FALSE - type: string 
+INFO: [Synth 8-6155] done synthesizing module 'PLLE2_ADV__parameterized0' (3#1) [/share/instsww/xilinx/Vivado/2021.1/scripts/rt/data/unisim_comp.v:84453]
+INFO: [Synth 8-6155] done synthesizing module 'clocks' (4#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/clocks.v:1]
+INFO: [Synth 8-6157] synthesizing module 'button_parser' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/button_parser.v:3]
+	Parameter WIDTH bound to: 4 - type: integer 
+	Parameter SAMPLE_CNT_MAX bound to: 40000 - type: integer 
+	Parameter PULSE_CNT_MAX bound to: 200 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'synchronizer__parameterized0' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+	Parameter WIDTH bound to: 4 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'synchronizer__parameterized0' (4#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+INFO: [Synth 8-6157] synthesizing module 'debouncer' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:1]
+	Parameter WIDTH bound to: 4 - type: integer 
+	Parameter SAMPLE_CNT_MAX bound to: 40000 - type: integer 
+	Parameter PULSE_CNT_MAX bound to: 200 - type: integer 
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:69]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:72]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:69]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:72]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:69]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:72]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:69]
+WARNING: [Synth 8-6090] variable 'saturating_counter' is written by both blocking and non-blocking assignments, entire logic could be removed [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:72]
+INFO: [Synth 8-6155] done synthesizing module 'debouncer' (5#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/debouncer.v:1]
+INFO: [Synth 8-6157] synthesizing module 'edge_detector' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/edge_detector.v:1]
+	Parameter WIDTH bound to: 4 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'edge_detector' (6#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/edge_detector.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'button_parser' (7#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/button_parser.v:3]
+INFO: [Synth 8-6157] synthesizing module 'synchronizer__parameterized1' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+	Parameter WIDTH bound to: 2 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'synchronizer__parameterized1' (7#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/synchronizer.v:1]
+INFO: [Synth 8-6157] synthesizing module 'cpu' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/cpu.v:1]
+	Parameter CPU_CLOCK_FREQ bound to: 80000000 - type: integer 
+	Parameter RESET_PC bound to: 1073741824 - type: integer 
+	Parameter BAUD_RATE bound to: 115200 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'bios_mem' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/bios_mem.v:1]
+CRITICAL WARNING: [Synth 8-4445] could not open $readmem data file '/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/../software/bios/bios.hex'; please make sure the file is added to project and has read permission, ignoring [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/bios_mem.v:27]
+	1: Unable to determine number of words or word size in RAM. 
+	2: No valid read/write found for RAM. 
+RAM dissolved into registers
+INFO: [Synth 8-6155] done synthesizing module 'bios_mem' (8#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/bios_mem.v:1]
+INFO: [Synth 8-6157] synthesizing module 'dmem' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/dmem.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'dmem' (9#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/dmem.v:1]
+INFO: [Synth 8-6157] synthesizing module 'imem' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/imem.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'imem' (10#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/memories/imem.v:1]
+INFO: [Synth 8-6157] synthesizing module 'reg_file' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/reg_file.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'reg_file' (11#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/reg_file.v:1]
+INFO: [Synth 8-6157] synthesizing module 'uart' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart.v:1]
+	Parameter CLOCK_FREQ bound to: 80000000 - type: integer 
+	Parameter BAUD_RATE bound to: 115200 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'uart_transmitter' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_transmitter.v:1]
+	Parameter CLOCK_FREQ bound to: 80000000 - type: integer 
+	Parameter BAUD_RATE bound to: 115200 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'uart_transmitter' (12#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_transmitter.v:1]
+INFO: [Synth 8-6157] synthesizing module 'uart_receiver' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_receiver.v:1]
+	Parameter CLOCK_FREQ bound to: 80000000 - type: integer 
+	Parameter BAUD_RATE bound to: 115200 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'uart_receiver' (13#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart_receiver.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'uart' (14#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/io_circuits/uart.v:1]
+INFO: [Synth 8-6157] synthesizing module 'FOUR_INPUT_MUX' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:21]
+INFO: [Synth 8-226] default block is never used [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:27]
+INFO: [Synth 8-6155] done synthesizing module 'FOUR_INPUT_MUX' (15#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:21]
+WARNING: [Synth 8-689] width (3) of port connection 'sel' does not match port width (2) of module 'FOUR_INPUT_MUX' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/cpu.v:120]
+INFO: [Synth 8-6157] synthesizing module 'ADDER' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:58]
+INFO: [Synth 8-6155] done synthesizing module 'ADDER' (16#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:58]
+INFO: [Synth 8-6157] synthesizing module 'TWO_INPUT_MUX' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:7]
+INFO: [Synth 8-226] default block is never used [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:13]
+INFO: [Synth 8-6155] done synthesizing module 'TWO_INPUT_MUX' (17#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:7]
+INFO: [Synth 8-6157] synthesizing module 'branch_predictor' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/branch_predictor.v:11]
+INFO: [Synth 8-6157] synthesizing module 'bp_cache' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/bp_cache.v:8]
+	Parameter AWIDTH bound to: 30 - type: integer 
+	Parameter DWIDTH bound to: 2 - type: integer 
+	Parameter LINES bound to: 128 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'bp_cache' (18#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/bp_cache.v:8]
+INFO: [Synth 8-6157] synthesizing module 'sat_updn' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/sat_updn.v:6]
+	Parameter WIDTH bound to: 2 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'sat_updn' (19#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/sat_updn.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'branch_predictor' (20#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/branch_prediction/branch_predictor.v:11]
+INFO: [Synth 8-6157] synthesizing module 'IMM_GEN' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:107]
+INFO: [Synth 8-6155] done synthesizing module 'IMM_GEN' (21#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:107]
+INFO: [Synth 8-6157] synthesizing module 'BRANCH_COMPARATOR' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:91]
+INFO: [Synth 8-6155] done synthesizing module 'BRANCH_COMPARATOR' (22#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:91]
+WARNING: [Synth 8-689] width (2) of port connection 'sel' does not match port width (1) of module 'TWO_INPUT_MUX' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/cpu.v:429]
+INFO: [Synth 8-6157] synthesizing module 'ALU' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:66]
+INFO: [Synth 8-6155] done synthesizing module 'ALU' (23#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:66]
+INFO: [Synth 8-6157] synthesizing module 'LDX' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:130]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:138]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:147]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:156]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:164]
+INFO: [Synth 8-6155] done synthesizing module 'LDX' (24#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:130]
+INFO: [Synth 8-6157] synthesizing module 'WF_CU' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:544]
+INFO: [Synth 8-6155] done synthesizing module 'WF_CU' (25#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:544]
+INFO: [Synth 8-6157] synthesizing module 'D_CU' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:635]
+INFO: [Synth 8-6155] done synthesizing module 'D_CU' (26#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:635]
+INFO: [Synth 8-6157] synthesizing module 'X_CU' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:679]
+INFO: [Synth 8-226] default block is never used [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:791]
+INFO: [Synth 8-155] case statement is not full and has no default [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:899]
+INFO: [Synth 8-6155] done synthesizing module 'X_CU' (27#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:679]
+INFO: [Synth 8-6155] done synthesizing module 'cpu' (28#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/riscv_core/cpu.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'z1top' (29#1) [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.v:1]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:11 ; elapsed = 00:00:12 . Memory (MB): peak = 2562.727 ; gain = 0.000 ; free physical = 3184 ; free virtual = 14483
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:13 ; elapsed = 00:00:14 . Memory (MB): peak = 2562.727 ; gain = 0.000 ; free physical = 3192 ; free virtual = 14489
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:13 ; elapsed = 00:00:14 . Memory (MB): peak = 2562.727 ; gain = 0.000 ; free physical = 3192 ; free virtual = 14489
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.28 ; elapsed = 00:00:00.28 . Memory (MB): peak = 2562.727 ; gain = 0.000 ; free physical = 3138 ; free virtual = 14435
+INFO: [Netlist 29-17] Analyzing 2 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc]
+Finished Parsing XDC File [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc]
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/z1top_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/z1top_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+INFO: [Timing 38-2] Deriving generated clocks
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2734.387 ; gain = 0.000 ; free physical = 2879 ; free virtual = 14178
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.02 . Memory (MB): peak = 2734.387 ; gain = 0.000 ; free physical = 2879 ; free virtual = 14178
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:27 ; elapsed = 00:00:29 . Memory (MB): peak = 2734.391 ; gain = 171.664 ; free physical = 3170 ; free virtual = 14467
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7z020clg400-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:27 ; elapsed = 00:00:29 . Memory (MB): peak = 2734.391 ; gain = 171.664 ; free physical = 3169 ; free virtual = 14466
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:27 ; elapsed = 00:00:29 . Memory (MB): peak = 2734.391 ; gain = 171.664 ; free physical = 3168 ; free virtual = 14466
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-6841] Block RAM (mem_reg) originally specified as a Byte Wide Write Enable RAM cannot take advantage of ByteWide feature and is implemented with single write enable per RAM due to following reason.
+(address width (14) is more than optimal threshold of 12. Implementing using BWWE will require more logic and timing would be suboptimal. Please use attribute ram_decomp = power if BWWE is desired.)
+WARNING: [Synth 8-6841] Block RAM (mem_reg) originally specified as a Byte Wide Write Enable RAM cannot take advantage of ByteWide feature and is implemented with single write enable per RAM due to following reason.
+(address width (14) is more than optimal threshold of 12. Implementing using BWWE will require more logic and timing would be suboptimal. Please use attribute ram_decomp = power if BWWE is desired.)
+WARNING: [Synth 8-327] inferring latch for variable 'ldx_out_reg' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/basic_modules.v:139]
+WARNING: [Synth 8-327] inferring latch for variable 'br_taken_reg' [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/EECS151.v:901]
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:38 ; elapsed = 00:00:41 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 3074 ; free virtual = 14375
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input   32 Bit       Adders := 6     
+	   3 Input   32 Bit       Adders := 1     
+	   2 Input   16 Bit       Adders := 1     
+	   2 Input   10 Bit       Adders := 2     
+	   2 Input    9 Bit       Adders := 4     
+	   2 Input    4 Bit       Adders := 3     
+	   2 Input    2 Bit       Adders := 2     
++---XORs : 
+	   2 Input     32 Bit         XORs := 1     
++---Registers : 
+	              128 Bit    Registers := 1     
+	               32 Bit    Registers := 44    
+	               16 Bit    Registers := 1     
+	               10 Bit    Registers := 3     
+	                9 Bit    Registers := 4     
+	                8 Bit    Registers := 1     
+	                4 Bit    Registers := 6     
+	                2 Bit    Registers := 2     
+	                1 Bit    Registers := 23    
++---RAMs : 
+	             512K Bit	(16384 X 32 bit)          RAMs := 2     
+	               2K Bit	(128 X 23 bit)          RAMs := 1     
+	              256 Bit	(128 X 2 bit)          RAMs := 1     
++---Muxes : 
+	   2 Input  128 Bit        Muxes := 1     
+	   2 Input   32 Bit        Muxes := 22    
+	  33 Input   32 Bit        Muxes := 2     
+	   4 Input   32 Bit        Muxes := 9     
+	   8 Input   32 Bit        Muxes := 1     
+	   3 Input   32 Bit        Muxes := 1     
+	   5 Input   32 Bit        Muxes := 2     
+	   7 Input   32 Bit        Muxes := 1     
+	   2 Input   16 Bit        Muxes := 1     
+	   2 Input    8 Bit        Muxes := 2     
+	   2 Input    4 Bit        Muxes := 2     
+	   8 Input    4 Bit        Muxes := 2     
+	  11 Input    4 Bit        Muxes := 2     
+	   2 Input    3 Bit        Muxes := 4     
+	  10 Input    3 Bit        Muxes := 1     
+	  16 Input    3 Bit        Muxes := 1     
+	   7 Input    3 Bit        Muxes := 1     
+	   2 Input    2 Bit        Muxes := 8     
+	   3 Input    2 Bit        Muxes := 2     
+	   5 Input    2 Bit        Muxes := 4     
+	  11 Input    2 Bit        Muxes := 1     
+	   4 Input    2 Bit        Muxes := 2     
+	  12 Input    2 Bit        Muxes := 1     
+	   2 Input    1 Bit        Muxes := 59    
+	   5 Input    1 Bit        Muxes := 1     
+	   3 Input    1 Bit        Muxes := 2     
+	  10 Input    1 Bit        Muxes := 1     
+	  11 Input    1 Bit        Muxes := 3     
+	   7 Input    1 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 220 (col length:60)
+BRAMs: 280 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-6841] Block RAM (mem_reg) originally specified as a Byte Wide Write Enable RAM cannot take advantage of ByteWide feature and is implemented with single write enable per RAM due to following reason.
+(address width (14) is more than optimal threshold of 12. Implementing using BWWE will require more logic and timing would be suboptimal. Please use attribute ram_decomp = power if BWWE is desired.)
+WARNING: [Synth 8-6841] Block RAM (mem_reg) originally specified as a Byte Wide Write Enable RAM cannot take advantage of ByteWide feature and is implemented with single write enable per RAM due to following reason.
+(address width (14) is more than optimal threshold of 12. Implementing using BWWE will require more logic and timing would be suboptimal. Please use attribute ram_decomp = power if BWWE is desired.)
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:01:10 ; elapsed = 00:01:14 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 3003 ; free virtual = 14348
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+Block RAM: Preliminary Mapping Report (see note below)
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+|Module Name | RTL Object | PORT A (Depth x Width) | W | R | PORT B (Depth x Width) | W | R | Ports driving FF | RAMB18 | RAMB36 | 
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+|cpui_4/dmem | mem_reg    | 16 K x 32(READ_FIRST)  | W | R |                        |   |   | Port A           | 0      | 16     | 
+|cpui_4/imem | mem_reg    | 16 K x 32(READ_FIRST)  | W |   | 16 K x 32(WRITE_FIRST) |   | R | Port A and B     | 0      | 16     | 
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+
+Note: The table above is a preliminary report that shows the Block RAMs at the current stage of the synthesis flow. Some Block RAMs may be reimplemented as non Block RAM primitives later in the synthesis flow. Multiple instantiated Block RAMs are reported only once. 
+
+Distributed RAM: Preliminary Mapping Report (see note below)
++--------------------+----------------+-----------+----------------------+-----------------+
+|Module Name         | RTL Object     | Inference | Size (Depth x Width) | Primitives      | 
++--------------------+----------------+-----------+----------------------+-----------------+
+|cpui_4/br_predictor | cache/data_reg | Implied   | 128 x 2              | RAM128X1D x 2   | 
+|cpui_4/br_predictor | cache/tag_reg  | Implied   | 128 x 23             | RAM128X1D x 23  | 
++--------------------+----------------+-----------+----------------------+-----------------+
+
+Note: The table above is a preliminary report that shows the Distributed RAMs at the current stage of the synthesis flow. Some Distributed RAMs may be reimplemented as non Distributed RAM primitives later in the synthesis flow. Multiple instantiated RAMs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:01:18 ; elapsed = 00:01:22 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2877 ; free virtual = 14225
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:01:23 ; elapsed = 00:01:28 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2856 ; free virtual = 14202
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+Block RAM: Final Mapping Report
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+|Module Name | RTL Object | PORT A (Depth x Width) | W | R | PORT B (Depth x Width) | W | R | Ports driving FF | RAMB18 | RAMB36 | 
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+|cpui_4/dmem | mem_reg    | 16 K x 32(READ_FIRST)  | W | R |                        |   |   | Port A           | 0      | 16     | 
+|cpui_4/imem | mem_reg    | 16 K x 32(READ_FIRST)  | W |   | 16 K x 32(WRITE_FIRST) |   | R | Port A and B     | 0      | 16     | 
++------------+------------+------------------------+---+---+------------------------+---+---+------------------+--------+--------+
+
+
+Distributed RAM: Final Mapping Report
++--------------------+----------------+-----------+----------------------+-----------------+
+|Module Name         | RTL Object     | Inference | Size (Depth x Width) | Primitives      | 
++--------------------+----------------+-----------+----------------------+-----------------+
+|cpui_4/br_predictor | cache/data_reg | Implied   | 128 x 2              | RAM128X1D x 2   | 
+|cpui_4/br_predictor | cache/tag_reg  | Implied   | 128 x 23             | RAM128X1D x 23  | 
++--------------------+----------------+-----------+----------------------+-----------------+
+
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_0_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_0_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_0_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_0_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_1_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_1_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_1_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_1_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_2_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_2_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_2_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_2_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_3_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_3_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_3_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/dmem/mem_reg_3_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_0_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_0_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_0_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_0_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_1_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_1_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_1_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_1_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_2_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_2_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_2_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_2_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_3_0 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_3_1 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_3_2 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7052] The timing for the instance cpu/imem/mem_reg_3_3 (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:01:27 ; elapsed = 00:01:31 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2867 ; free virtual = 14213
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+INFO: [Synth 8-4163] Replicating register fpga_serial_rx_iob_reg to handle IOB=TRUE attribute
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:01:31 ; elapsed = 00:01:35 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2870 ; free virtual = 14215
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:01:31 ; elapsed = 00:01:35 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2869 ; free virtual = 14215
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:32 ; elapsed = 00:01:36 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2868 ; free virtual = 14216
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:01:32 ; elapsed = 00:01:36 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2868 ; free virtual = 14216
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:01:32 ; elapsed = 00:01:37 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2868 ; free virtual = 14216
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:01:32 ; elapsed = 00:01:37 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2868 ; free virtual = 14216
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+----------+------+
+|      |Cell      |Count |
++------+----------+------+
+|1     |BUFG      |     5|
+|2     |CARRY4    |   115|
+|3     |LUT1      |    23|
+|4     |LUT2      |   126|
+|5     |LUT3      |   101|
+|6     |LUT4      |   301|
+|7     |LUT5      |   416|
+|8     |LUT6      |  1227|
+|9     |MUXF7     |   320|
+|10    |MUXF8     |   144|
+|11    |PLLE2_ADV |     2|
+|13    |RAM128X1D |    25|
+|14    |RAMB36E1  |    32|
+|16    |FDRE      |  1574|
+|17    |FDSE      |     4|
+|18    |LD        |    32|
+|19    |LDC       |     1|
+|20    |IBUF      |     4|
+|21    |OBUF      |     3|
+|22    |OBUFT     |     6|
++------+----------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:01:32 ; elapsed = 00:01:37 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2868 ; free virtual = 14216
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 6 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:01:23 ; elapsed = 00:01:28 . Memory (MB): peak = 2734.398 ; gain = 0.012 ; free physical = 2924 ; free virtual = 14271
+Synthesis Optimization Complete : Time (s): cpu = 00:01:32 ; elapsed = 00:01:37 . Memory (MB): peak = 2734.398 ; gain = 171.672 ; free physical = 2924 ; free virtual = 14271
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.05 . Memory (MB): peak = 2734.398 ; gain = 0.000 ; free physical = 3012 ; free virtual = 14359
+INFO: [Netlist 29-17] Analyzing 671 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Parsing XDC File [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc]
+Finished Parsing XDC File [/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/src/z1top.xdc]
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2734.398 ; gain = 0.000 ; free physical = 2944 ; free virtual = 14291
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 58 instances were transformed.
+  LD => LDCE: 32 instances
+  LDC => LDCE: 1 instance 
+  RAM128X1D => RAM128X1D (MUXF7(x2), RAMD64E(x4)): 25 instances
+
+Synth Design complete, checksum: 6e0d7b89
+INFO: [Common 17-83] Releasing license: Synthesis
+123 Infos, 19 Warnings, 1 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:01:48 ; elapsed = 00:01:47 . Memory (MB): peak = 2734.398 ; gain = 175.957 ; free physical = 3097 ; free virtual = 14445
+INFO: [Common 17-600] The following parameters have non-default value.
+general.maxThreads
+# write_checkpoint -force ${TOP}.dcp
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Writing placer database...
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Writing XDEF routing special nets.
+Write XDEF Complete: Time (s): cpu = 00:00:00.08 ; elapsed = 00:00:00.04 . Memory (MB): peak = 2774.402 ; gain = 0.000 ; free physical = 3096 ; free virtual = 14446
+INFO: [Common 17-1381] The checkpoint '/home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/build/synth/z1top.dcp' has been generated.
+# report_timing_summary -file post_synth_timing_summary.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-2] Deriving generated clocks
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 4 CPUs
+# report_drc -file post_synth_drc.rpt
+Command: report_drc -file post_synth_drc.rpt
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/share/instsww/xilinx/Vivado/2021.1/data/ip'.
+INFO: [DRC 23-27] Running DRC with 4 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /home/cc/eecs151/fa22/class/eecs151-aaq/Desktop/fa22_fpga_team43/hardware/build/synth/post_synth_drc.rpt.
+report_drc completed successfully
+# report_utilization -file post_synth_utilization.rpt
+# write_verilog -force -file post_synth.v
+# write_xdc -force -file post_synth.xdc
+INFO: [Common 17-206] Exiting Vivado at Fri Dec  9 16:44:13 2022...

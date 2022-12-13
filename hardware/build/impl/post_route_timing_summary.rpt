@@ -1,0 +1,439 @@
+Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2021.1 (lin64) Build 3247384 Thu Jun 10 19:36:07 MDT 2021
+| Date         : Fri Dec  9 16:48:47 2022
+| Host         : c111-6.eecs.berkeley.edu running 64-bit CentOS Linux release 7.9.2009 (Core)
+| Command      : report_timing_summary -warn_on_violation -file post_route_timing_summary.rpt
+| Design       : z1top
+| Device       : 7z020-clg400
+| Speed File   : -1  PRODUCTION 1.12 2019-11-22
+----------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+------------------------------------------------------------------------------------------------
+| Report Methodology
+| ------------------
+------------------------------------------------------------------------------------------------
+
+No report available as report_methodology has not been run prior. Run report_methodology on the current design for the summary of methodology violations.
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock (322)
+2. checking constant_clock (0)
+3. checking pulse_width_clock (0)
+4. checking unconstrained_internal_endpoints (34)
+5. checking no_input_delay (3)
+6. checking no_output_delay (1)
+7. checking multiple_clock (0)
+8. checking generated_clocks (0)
+9. checking loops (0)
+10. checking partial_input_delay (0)
+11. checking partial_output_delay (0)
+12. checking latch_loops (0)
+
+1. checking no_clock (322)
+--------------------------
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/alu_register_q_reg[0]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/alu_register_q_reg[1]/Q (HIGH)
+
+ There is 1 register/latch pin with no clock driven by root clock pin: cpu/instruction_decode_register_q_reg[13]/Q (HIGH)
+
+ There is 1 register/latch pin with no clock driven by root clock pin: cpu/instruction_decode_register_q_reg[14]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[12]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[13]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[14]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[2]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[3]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[4]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[5]/Q (HIGH)
+
+ There are 32 register/latch pins with no clock driven by root clock pin: cpu/instruction_execute_register_q_reg[6]/Q (HIGH)
+
+
+2. checking constant_clock (0)
+------------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock (0)
+---------------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints (34)
+-------------------------------------------------
+ There are 34 pins that are not constrained for maximum delay. (HIGH)
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay (3)
+------------------------------
+ There are 3 input ports with no input delay specified. (HIGH)
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay (1)
+-------------------------------
+ There is 1 port with no output delay specified. (HIGH)
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock (0)
+------------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks (0)
+--------------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops (0)
+---------------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay (0)
+------------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay (0)
+-------------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops (0)
+----------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      0.181        0.000                      0                 4692        0.064        0.000                      0                 4692        2.000        0.000                       0                  1732  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock                 Waveform(ns)         Period(ns)      Frequency(MHz)
+-----                 ------------         ----------      --------------
+CLK_125MHZ_FPGA       {0.000 4.000}        8.000           125.000         
+  cpu_clk_int         {0.000 6.250}        12.500          80.000          
+  cpu_clk_pll_fb_out  {0.000 20.000}       40.000          25.000          
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock                     WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----                     -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+CLK_125MHZ_FPGA                                                                                                                                                         2.000        0.000                       0                     1  
+  cpu_clk_int               0.181        0.000                      0                 4692        0.064        0.000                      0                 4692        5.000        0.000                       0                  1728  
+  cpu_clk_pll_fb_out                                                                                                                                                   12.633        0.000                       0                     3  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints      WHS(ns)      THS(ns)  THS Failing Endpoints  THS Total Endpoints  
+----------    ----------    --------          -------      -------  ---------------------  -------------------      -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  CLK_125MHZ_FPGA
+  To Clock:  CLK_125MHZ_FPGA
+
+Setup :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+Hold  :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+PW    :            0  Failing Endpoints,  Worst Slack        2.000ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         CLK_125MHZ_FPGA
+Waveform(ns):       { 0.000 4.000 }
+Period(ns):         8.000
+Sources:            { CLK_125MHZ_FPGA }
+
+Check Type        Corner  Lib Pin           Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location        Pin
+Min Period        n/a     PLLE2_ADV/CLKIN1  n/a            1.249         8.000       6.751      PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKIN1
+Max Period        n/a     PLLE2_ADV/CLKIN1  n/a            52.633        8.000       44.633     PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKIN1
+Low Pulse Width   Slow    PLLE2_ADV/CLKIN1  n/a            2.000         4.000       2.000      PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKIN1
+High Pulse Width  Slow    PLLE2_ADV/CLKIN1  n/a            2.000         4.000       2.000      PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKIN1
+
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  cpu_clk_int
+  To Clock:  cpu_clk_int
+
+Setup :            0  Failing Endpoints,  Worst Slack        0.181ns,  Total Violation        0.000ns
+Hold  :            0  Failing Endpoints,  Worst Slack        0.064ns,  Total Violation        0.000ns
+PW    :            0  Failing Endpoints,  Worst Slack        5.000ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.181ns  (required time - arrival time)
+  Source:                 cpu/instruction_execute_register_q_reg[11]/C
+                            (rising edge-triggered cell FDRE clocked by cpu_clk_int  {rise@0.000ns fall@6.250ns period=12.500ns})
+  Destination:            cpu/branch_instructions_counter_reg[20]/R
+                            (rising edge-triggered cell FDRE clocked by cpu_clk_int  {rise@0.000ns fall@6.250ns period=12.500ns})
+  Path Group:             cpu_clk_int
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            12.500ns  (cpu_clk_int rise@12.500ns - cpu_clk_int rise@0.000ns)
+  Data Path Delay:        11.551ns  (logic 2.207ns (19.107%)  route 9.344ns (80.893%))
+  Logic Levels:           12  (LUT4=2 LUT5=3 LUT6=6 MUXF7=1)
+  Clock Path Skew:        -0.147ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.264ns = ( 14.764 - 12.500 ) 
+    Source Clock Delay      (SCD):    2.407ns
+    Clock Pessimism Removal (CPR):    -0.004ns
+  Clock Uncertainty:      0.097ns  ((TSJ^2 + DJ^2)^1/2) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Discrete Jitter          (DJ):    0.181ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock cpu_clk_int rise edge)
+                                                      0.000     0.000 r  
+    H16                                               0.000     0.000 r  CLK_125MHZ_FPGA (IN)
+                         net (fo=0)                   0.000     0.000    CLK_125MHZ_FPGA
+    H16                  IBUF (Prop_ibuf_I_O)         1.451     1.451 r  CLK_125MHZ_FPGA_IBUF_inst/O
+                         net (fo=1, routed)           1.306     2.757    clk_gen/clk_125mhz
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT0)
+                                                     -4.306    -1.549 r  clk_gen/plle2_cpu_inst/CLKOUT0
+                         net (fo=1, routed)           2.200     0.651    clk_gen/cpu_clk_int
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.101     0.752 r  clk_gen/cpu_clk_buf/O
+                         net (fo=1726, routed)        1.655     2.407    cpu/cpu_clk
+    SLICE_X53Y8          FDRE                                         r  cpu/instruction_execute_register_q_reg[11]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X53Y8          FDRE (Prop_fdre_C_Q)         0.456     2.863 r  cpu/instruction_execute_register_q_reg[11]/Q
+                         net (fo=38, routed)          0.707     3.569    cpu/branch_comp/mem_reg_0_0_i_104[9]
+    SLICE_X53Y8          LUT5 (Prop_lut5_I0_O)        0.124     3.693 f  cpu/branch_comp/mem_reg_0_0_i_105/O
+                         net (fo=6, routed)           0.775     4.468    cpu/branch_comp/instruction_execute_register_q_reg[11]
+    SLICE_X50Y9          LUT6 (Prop_lut6_I4_O)        0.124     4.592 r  cpu/branch_comp/mem_reg_0_0_i_263/O
+                         net (fo=34, routed)          0.558     5.150    cpu/a_mux/rs1_mux2_sel[0]
+    SLICE_X48Y9          LUT6 (Prop_lut6_I5_O)        0.124     5.274 f  cpu/a_mux/mem_reg_0_0_i_151/O
+                         net (fo=32, routed)          1.162     6.436    cpu/a_mux/mem_reg_0_0_i_151_n_1
+    SLICE_X49Y3          LUT6 (Prop_lut6_I3_O)        0.124     6.560 f  cpu/a_mux/mem_reg_0_0_i_102/O
+                         net (fo=14, routed)          1.154     7.714    cpu/ldx/a_mux_out[9]
+    SLICE_X49Y1          LUT6 (Prop_lut6_I1_O)        0.124     7.838 f  cpu/ldx/mem_reg_0_0_i_265/O
+                         net (fo=3, routed)           0.818     8.656    cpu/ldx/mem_reg_0_0_i_265_n_1
+    SLICE_X48Y2          LUT6 (Prop_lut6_I1_O)        0.124     8.780 f  cpu/ldx/out_i_28__0/O
+                         net (fo=2, routed)           0.771     9.551    cpu/ldx/out_i_28__0_n_1
+    SLICE_X48Y12         LUT6 (Prop_lut6_I0_O)        0.124     9.675 f  cpu/ldx/out_i_20/O
+                         net (fo=1, routed)           0.000     9.675    cpu/ldx/out_i_20_n_1
+    SLICE_X48Y12         MUXF7 (Prop_muxf7_I0_O)      0.212     9.887 f  cpu/ldx/out_i_10/O
+                         net (fo=1, routed)           0.436    10.323    cpu/x_cu/alu_register_q_reg[30]
+    SLICE_X48Y12         LUT5 (Prop_lut5_I2_O)        0.299    10.622 f  cpu/x_cu/out_i_2/O
+                         net (fo=4, routed)           0.862    11.485    cpu/x_cu/pc_mux_in3[17]
+    SLICE_X40Y10         LUT4 (Prop_lut4_I1_O)        0.124    11.609 f  cpu/x_cu/bit_counter[3]_i_9/O
+                         net (fo=3, routed)           0.467    12.076    cpu/x_cu/bit_counter[3]_i_9_n_1
+    SLICE_X40Y9          LUT5 (Prop_lut5_I2_O)        0.124    12.200 f  cpu/x_cu/cycle_counter[0]_i_4/O
+                         net (fo=1, routed)           0.764    12.963    cpu/x_cu/cycle_counter[0]_i_4_n_1
+    SLICE_X40Y7          LUT4 (Prop_lut4_I2_O)        0.124    13.087 r  cpu/x_cu/cycle_counter[0]_i_1/O
+                         net (fo=128, routed)         0.870    13.958    cpu/x_cu_n_28
+    SLICE_X34Y9          FDRE                                         r  cpu/branch_instructions_counter_reg[20]/R
+  -------------------------------------------------------------------    -------------------
+
+                         (clock cpu_clk_int rise edge)
+                                                     12.500    12.500 r  
+    H16                                               0.000    12.500 r  CLK_125MHZ_FPGA (IN)
+                         net (fo=0)                   0.000    12.500    CLK_125MHZ_FPGA
+    H16                  IBUF (Prop_ibuf_I_O)         1.380    13.880 r  CLK_125MHZ_FPGA_IBUF_inst/O
+                         net (fo=1, routed)           1.181    15.061    clk_gen/clk_125mhz
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT0)
+                                                     -3.890    11.171 r  clk_gen/plle2_cpu_inst/CLKOUT0
+                         net (fo=1, routed)           2.007    13.178    clk_gen/cpu_clk_int
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.091    13.269 r  clk_gen/cpu_clk_buf/O
+                         net (fo=1726, routed)        1.494    14.764    cpu/cpu_clk
+    SLICE_X34Y9          FDRE                                         r  cpu/branch_instructions_counter_reg[20]/C
+                         clock pessimism             -0.004    14.760    
+                         clock uncertainty           -0.097    14.663    
+    SLICE_X34Y9          FDRE (Setup_fdre_C_R)       -0.524    14.139    cpu/branch_instructions_counter_reg[20]
+  -------------------------------------------------------------------
+                         required time                         14.139    
+                         arrival time                         -13.958    
+  -------------------------------------------------------------------
+                         slack                                  0.181    
+
+
+
+
+
+Min Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.064ns  (arrival time - required time)
+  Source:                 cpu/pc_decode_register_q_reg[24]/C
+                            (rising edge-triggered cell FDRE clocked by cpu_clk_int  {rise@0.000ns fall@6.250ns period=12.500ns})
+  Destination:            cpu/br_predictor/cache/tag_reg_0_127_15_15/SP.LOW/I
+                            (rising edge-triggered cell RAMD64E clocked by cpu_clk_int  {rise@0.000ns fall@6.250ns period=12.500ns})
+  Path Group:             cpu_clk_int
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (cpu_clk_int rise@0.000ns - cpu_clk_int rise@0.000ns)
+  Data Path Delay:        0.221ns  (logic 0.141ns (63.734%)  route 0.080ns (36.266%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.013ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    0.762ns
+    Source Clock Delay      (SCD):    0.540ns
+    Clock Pessimism Removal (CPR):    0.209ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock cpu_clk_int rise edge)
+                                                      0.000     0.000 r  
+    H16                                               0.000     0.000 r  CLK_125MHZ_FPGA (IN)
+                         net (fo=0)                   0.000     0.000    CLK_125MHZ_FPGA
+    H16                  IBUF (Prop_ibuf_I_O)         0.219     0.219 r  CLK_125MHZ_FPGA_IBUF_inst/O
+                         net (fo=1, routed)           0.440     0.659    clk_gen/clk_125mhz
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT0)
+                                                     -1.415    -0.756 r  clk_gen/plle2_cpu_inst/CLKOUT0
+                         net (fo=1, routed)           0.711    -0.044    clk_gen/cpu_clk_int
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.026    -0.018 r  clk_gen/cpu_clk_buf/O
+                         net (fo=1726, routed)        0.559     0.540    cpu/cpu_clk
+    SLICE_X47Y12         FDRE                                         r  cpu/pc_decode_register_q_reg[24]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X47Y12         FDRE (Prop_fdre_C_Q)         0.141     0.681 r  cpu/pc_decode_register_q_reg[24]/Q
+                         net (fo=8, routed)           0.080     0.762    cpu/br_predictor/cache/tag_reg_0_127_15_15/D
+    SLICE_X46Y12         RAMD64E                                      r  cpu/br_predictor/cache/tag_reg_0_127_15_15/SP.LOW/I
+  -------------------------------------------------------------------    -------------------
+
+                         (clock cpu_clk_int rise edge)
+                                                      0.000     0.000 r  
+    H16                                               0.000     0.000 r  CLK_125MHZ_FPGA (IN)
+                         net (fo=0)                   0.000     0.000    CLK_125MHZ_FPGA
+    H16                  IBUF (Prop_ibuf_I_O)         0.406     0.406 r  CLK_125MHZ_FPGA_IBUF_inst/O
+                         net (fo=1, routed)           0.481     0.887    clk_gen/clk_125mhz
+    PLLE2_ADV_X1Y2       PLLE2_ADV (Prop_plle2_adv_CLKIN1_CLKOUT0)
+                                                     -1.747    -0.860 r  clk_gen/plle2_cpu_inst/CLKOUT0
+                         net (fo=1, routed)           0.768    -0.092    clk_gen/cpu_clk_int
+    BUFGCTRL_X0Y16       BUFG (Prop_bufg_I_O)         0.029    -0.063 r  clk_gen/cpu_clk_buf/O
+                         net (fo=1726, routed)        0.825     0.762    cpu/br_predictor/cache/tag_reg_0_127_15_15/WCLK
+    SLICE_X46Y12         RAMD64E                                      r  cpu/br_predictor/cache/tag_reg_0_127_15_15/SP.LOW/CLK
+                         clock pessimism             -0.209     0.553    
+    SLICE_X46Y12         RAMD64E (Hold_ramd64e_CLK_I)
+                                                      0.144     0.697    cpu/br_predictor/cache/tag_reg_0_127_15_15/SP.LOW
+  -------------------------------------------------------------------
+                         required time                         -0.697    
+                         arrival time                           0.762    
+  -------------------------------------------------------------------
+                         slack                                  0.064    
+
+
+
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         cpu_clk_int
+Waveform(ns):       { 0.000 6.250 }
+Period(ns):         12.500
+Sources:            { clk_gen/plle2_cpu_inst/CLKOUT0 }
+
+Check Type        Corner  Lib Pin             Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location        Pin
+Min Period        n/a     RAMB36E1/CLKARDCLK  n/a            2.944         12.500      9.556      RAMB36_X3Y0     cpu/imem/mem_reg_0_0/CLKARDCLK
+Max Period        n/a     PLLE2_ADV/CLKOUT0   n/a            160.000       12.500      147.500    PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKOUT0
+Low Pulse Width   Slow    RAMD64E/CLK         n/a            1.250         6.250       5.000      SLICE_X58Y7     cpu/br_predictor/cache/data_reg_0_127_0_0/DP.HIGH/CLK
+High Pulse Width  Slow    RAMD64E/CLK         n/a            1.250         6.250       5.000      SLICE_X58Y7     cpu/br_predictor/cache/data_reg_0_127_0_0/DP.HIGH/CLK
+
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  cpu_clk_pll_fb_out
+  To Clock:  cpu_clk_pll_fb_out
+
+Setup :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+Hold  :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+PW    :            0  Failing Endpoints,  Worst Slack       12.633ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         cpu_clk_pll_fb_out
+Waveform(ns):       { 0.000 20.000 }
+Period(ns):         40.000
+Sources:            { clk_gen/plle2_cpu_inst/CLKFBOUT }
+
+Check Type  Corner  Lib Pin            Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location        Pin
+Min Period  n/a     BUFG/I             n/a            2.155         40.000      37.845     BUFGCTRL_X0Y17  clk_gen/cpu_clk_f_buf/I
+Max Period  n/a     PLLE2_ADV/CLKFBIN  n/a            52.633        40.000      12.633     PLLE2_ADV_X1Y2  clk_gen/plle2_cpu_inst/CLKFBIN
+
+
+
