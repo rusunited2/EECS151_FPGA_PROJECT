@@ -1,4 +1,8 @@
-# EECS 151/251A FPGA Project Skeleton for Fall 2022
+# EECS 151/251A FPGA Project (Fall 2022)
+
+
+## FINAL PROJECT REPORT (100% Project Completion)
+
 
 ## Specs
 
