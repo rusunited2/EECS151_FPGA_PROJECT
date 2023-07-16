@@ -2,7 +2,7 @@
 
 
 ## FINAL PROJECT REPORT (100% Project Completion)
-
+Please see the link for the full explanation of the project, found on https://github.com/rusunited2/EECS151_FPGA_PROJECT/blob/master/EECS_151_Final_Project_Report_FPGA_Lab_-_Adyant_Khanna__Russel_Sofia.pdf
 
 ## Specs
 
